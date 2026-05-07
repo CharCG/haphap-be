@@ -7,3 +7,252 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum ActiveRole {
+  CUSTOMER
+  MERCHANT
+  ADMIN
+}
+
+enum MerchantStatus {
+  PENDING
+  ACTIVE
+  REJECTED
+  SUSPENDED
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum MerchantCategory {
+  BAKERY
+  RESTORAN
+  KAFE
+  GROCERY
+  JAJANAN
+  DESSERT
+}
+
+enum OrderStatus {
+  PENDING_PAYMENT
+  PAID
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  SETTLEMENT
+  DENY
+  CANCEL
+  EXPIRE
+}
+
+model User {
+  id         String     @id @default(uuid())
+  name       String
+  email      String     @unique
+  password   String
+  phone      String?
+  avatar     String?
+  activeRole ActiveRole @default(CUSTOMER)
+  isMerchant Boolean    @default(false)
+  isActive   Boolean    @default(true)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+
+  merchant            Merchant?
+  merchantApplication MerchantApplication?
+  orders              Order[]
+  reviews             Review[]
+  customerStats       CustomerStats?
+
+  @@map("users")
+}
+
+model MerchantApplication {
+  id             String             @id @default(uuid())
+  userId         String             @unique
+  businessName   String
+  address        String
+  latitude       Float
+  longitude      Float
+  description    String?
+  openTime       String
+  closeTime      String
+  phone          String
+  categories     MerchantCategory[]
+  status         ApplicationStatus  @default(PENDING)
+  rejectedReason String?
+  reviewedAt     DateTime?
+  createdAt      DateTime           @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("merchant_applications")
+}
+
+model Merchant {
+  id           String             @id @default(uuid())
+  userId       String             @unique
+  businessName String
+  address      String
+  latitude     Float
+  longitude    Float
+  description  String?
+  openTime     String
+  closeTime    String
+  phone        String
+  logo         String?
+  categories   MerchantCategory[]
+  status       MerchantStatus     @default(ACTIVE)
+
+  totalRevenue   Int @default(0)
+  totalSoldItems Int @default(0)
+
+  ratingAvg   Float @default(0)
+  ratingCount Int   @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user         User          @relation(fields: [userId], references: [id])
+  menuItems    MenuItem[]
+  surplusItems SurplusItem[]
+  orders       Order[]
+  reviews      Review[]
+
+  @@map("merchants")
+}
+
+model MenuItem {
+  id          String   @id @default(uuid())
+  merchantId  String
+  name        String
+  description String?
+  image       String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  merchant    Merchant     @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  surplusItem SurplusItem?
+
+  @@index([merchantId])
+  @@map("menu_items")
+}
+
+model SurplusItem {
+  id            String   @id @default(uuid())
+  menuItemId    String   @unique
+  merchantId    String
+  originalPrice Int
+  discountPrice Int
+  stock         Int
+  reservedStock Int      @default(0)
+  isActive      Boolean  @default(true)
+  date          DateTime @db.Date
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  menuItem   MenuItem    @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  merchant   Merchant    @relation(fields: [merchantId], references: [id])
+  orderItems OrderItem[]
+
+  @@unique([menuItemId, date])
+  @@index([merchantId, isActive])
+  @@index([date])
+  @@map("surplus_items")
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  userId      String
+  merchantId  String
+  totalAmount Int
+  status      OrderStatus @default(PENDING_PAYMENT)
+  qrToken     String?     @unique
+  notes       String?
+  expiredAt   DateTime
+  paidAt      DateTime?
+  completedAt DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  user       User        @relation(fields: [userId], references: [id])
+  merchant   Merchant    @relation(fields: [merchantId], references: [id])
+  orderItems OrderItem[]
+  payment    Payment?
+  review     Review?
+
+  @@index([userId])
+  @@index([merchantId])
+  @@index([status])
+  @@index([expiredAt])
+  @@map("orders")
+}
+
+model OrderItem {
+  id            String @id @default(uuid())
+  orderId       String
+  surplusItemId String
+  quantity      Int
+  unitPrice     Int
+
+  order       Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  surplusItem SurplusItem @relation(fields: [surplusItemId], references: [id])
+
+  @@index([orderId])
+  @@map("order_items")
+}
+
+model Payment {
+  id              String        @id @default(uuid())
+  orderId         String        @unique
+  midtransOrderId String        @unique
+  transactionId   String?       @unique
+  status          PaymentStatus @default(PENDING)
+  amount          Int
+  qrCodeUrl       String?
+  deeplink        String?
+  webhookPayload  Json?
+  settledAt       DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@map("payments")
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  userId     String
+  merchantId String
+  orderId    String   @unique
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+
+  user     User     @relation(fields: [userId], references: [id])
+  merchant Merchant @relation(fields: [merchantId], references: [id])
+  order    Order    @relation(fields: [orderId], references: [id])
+
+  @@index([merchantId])
+  @@map("reviews")
+}
+
+model CustomerStats {
+  userId        String   @id
+  totalSaved    Int      @default(0)
+  totalPortions Int      @default(0)
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("customer_stats")
+}
