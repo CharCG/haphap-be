@@ -1,5 +1,5 @@
 import {
-  ConflictException,
+  BadRequestException,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -16,20 +16,19 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async register(registerDto: RegisterDto) {
-    const existingUser = await this.authRepository.findByEmail(registerDto.email,);
+  async register(dto: RegisterDto) {
+    const existingUser = await this.authRepository.findByEmail(dto.email);
     if (existingUser) {
-      throw new ConflictException('Email already exist');
+      throw new BadRequestException('Email already exist');
     }
 
-    const hashedPassword = await bcrypt.hash(registerDto.password, 10);
+    const hashedPassword = await bcrypt.hash(dto.password, 10);
 
     const user = await this.authRepository.create({
-      name: registerDto.name,
-      email: registerDto.email,
+      name: dto.name,
+      email: dto.email,
       password: hashedPassword,
-      phone: registerDto.phone,
-      role: 'CUSTOMER',
+      phone: dto.phone,
     });
 
     return {
@@ -42,16 +41,13 @@ export class AuthService {
     };
   }
 
-  async login(loginDto: LoginDto) {
-    const user = await this.authRepository.findByEmail(loginDto.email);
+  async login(dto: LoginDto) {
+    const user = await this.authRepository.findByEmail(dto.email);
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const isPasswordValid = await bcrypt.compare(
-      loginDto.password,
-      user.password,
-    );
+    const isPasswordValid = await bcrypt.compare(dto.password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials');
     }
