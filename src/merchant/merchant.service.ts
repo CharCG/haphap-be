@@ -59,8 +59,8 @@ export class MerchantService {
   }
 
   async findReviews(merchantId: string) {
-    const reviews =
-      await this.merchantRepository.findReviewsByMerchantId(merchantId);
+    const reviews = await this.merchantRepository.findReviewsByMerchantId(merchantId);
+    
     return reviews.map((r) => ({
       reviewId: r.id,
       rating: r.rating,

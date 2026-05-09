@@ -4,7 +4,7 @@ import { MerchantCategory, Prisma } from 'generated/prisma/client';
 
 @Injectable()
 export class MerchantRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
   async findAll(search?: string, categories?: MerchantCategory[]) {
     const where: Prisma.MerchantWhereInput = {};
@@ -17,7 +17,7 @@ export class MerchantRepository {
       where.categories = { hasSome: categories };
     }
 
-    return this.prisma.merchant.findMany({
+    return this.prismaService.merchant.findMany({
       where,
       select: {
         id: true,
@@ -34,7 +34,7 @@ export class MerchantRepository {
   }
 
   async findByIdWithSurplus(id: string) {
-    return this.prisma.merchant.findUnique({
+    return this.prismaService.merchant.findUnique({
       where: { id },
       include: {
         surplusItems: {
@@ -48,7 +48,7 @@ export class MerchantRepository {
   }
 
   async findReviewsByMerchantId(merchantId: string) {
-    return this.prisma.review.findMany({
+    return this.prismaService.review.findMany({
       where: { merchantId },
       include: {
         user: {
@@ -63,13 +63,13 @@ export class MerchantRepository {
   }
 
   async findByUserId(userId: string) {
-    return this.prisma.merchant.findUnique({
+    return this.prismaService.merchant.findUnique({
       where: { userId },
     });
   }
 
   async update(id: string, data: Prisma.MerchantUpdateInput) {
-    return this.prisma.merchant.update({
+    return this.prismaService.merchant.update({
       where: { id },
       data,
       select: {

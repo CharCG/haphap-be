@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { UserRepository } from './user.repository';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
@@ -51,23 +47,19 @@ export class UserService {
 
   async updatePassword(id: string, dto: UpdatePasswordDto) {
     const user = await this.userRepository.findById(id);
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    const isPasswordValid = await bcrypt.compare(
-      dto.currentPassword,
-      user.password,
-    );
+    const isPasswordValid = await bcrypt.compare(dto.currentPassword, user.password);
 
     if (!isPasswordValid) {
       throw new BadRequestException('Invalid current password');
     }
 
     const hashedPassword = await bcrypt.hash(dto.newPassword, 10);
-    const updatedUser = await this.userRepository.update(id, {
-      password: hashedPassword,
-    });
+    const updatedUser = await this.userRepository.update(id, { password: hashedPassword });
 
     return {
       userId: updatedUser.id,

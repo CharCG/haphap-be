@@ -5,6 +5,7 @@ import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { Role } from 'generated/prisma/enums';
 import { CurrentUser } from 'src/common/decorators/current-user.decorator';
+import { CurrentUserDto } from 'src/common/dto/current-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 
@@ -15,20 +16,17 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get('me')
-  async getMe(@CurrentUser() user: any) {
-    return this.userService.getMe(user.userId);
+  async getMe(@CurrentUser() user: CurrentUserDto) {
+    return this.userService.getMe(user.id);
   }
 
   @Patch('me')
-  async updateMe(@CurrentUser() user: any, @Body() dto: UpdateUserDto) {
-    return this.userService.updateMe(user.userId, dto);
+  async updateMe(@CurrentUser() user: CurrentUserDto, @Body() dto: UpdateUserDto) {
+    return this.userService.updateMe(user.id, dto);
   }
 
   @Patch('me/password')
-  async updatePassword(
-    @CurrentUser() user: any,
-    @Body() dto: UpdatePasswordDto,
-  ) {
-    return this.userService.updatePassword(user.userId, dto);
+  async updatePassword(@CurrentUser() user: CurrentUserDto, @Body() dto: UpdatePasswordDto) {
+    return this.userService.updatePassword(user.id, dto);
   }
 }
