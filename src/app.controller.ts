@@ -1,5 +1,5 @@
 import { Controller, Get, BadRequestException } from '@nestjs/common';
-import { ActiveRole } from 'generated/prisma/enums';
+import { Role } from 'generated/prisma/enums';
 
 @Controller()
 export class AppController {
@@ -8,7 +8,7 @@ export class AppController {
     return {
       id: 1,
       name: 'John Doe',
-      role: ActiveRole.ADMIN,
+      role: Role.ADMIN,
     };
   }
   @Get('test-error-string')
