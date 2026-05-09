@@ -8,10 +8,17 @@ datasource db {
   provider = "postgresql"
 }
 
-enum Role {
+enum ActiveRole {
   CUSTOMER
   MERCHANT
   ADMIN
+}
+
+enum MerchantStatus {
+  PENDING
+  ACTIVE
+  REJECTED
+  SUSPENDED
 }
 
 enum ApplicationStatus {
@@ -21,16 +28,16 @@ enum ApplicationStatus {
 }
 
 enum MerchantCategory {
-  ROTI
+  BAKERY
   RESTORAN
   KAFE
-  KEBUTUHAN
+  GROCERY
   JAJANAN
-  PENUTUP
+  DESSERT
 }
 
 enum OrderStatus {
-  PENDING
+  PENDING_PAYMENT
   PAID
   COMPLETED
   CANCELLED
@@ -38,39 +45,60 @@ enum OrderStatus {
 
 enum PaymentStatus {
   PENDING
-  SUCCESS
-  FAILED
-  EXPIRED
+  SETTLEMENT
+  DENY
+  CANCEL
+  EXPIRE
 }
 
 model User {
-  id       String  @id @default(uuid())
-  name     String
-  email    String  @unique
-  password String
-  phone    String
-  avatar   String?
-  role     Role    @default(CUSTOMER)
+  id         String     @id @default(uuid())
+  name       String
+  email      String     @unique
+  password   String
+  phone      String?
+  avatar     String?
+  activeRole ActiveRole @default(CUSTOMER)
+  isMerchant Boolean    @default(false)
+  isActive   Boolean    @default(true)
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
 
-  totalSaved   Int @default(0)
-  totalPortion Int @default(0)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  merchant    Merchant?
-  application Application[]
-  orders      Order[]
-  reviews     Review[]
+  merchant            Merchant?
+  merchantApplication MerchantApplication?
+  orders              Order[]
+  reviews             Review[]
+  customerStats       CustomerStats?
 
   @@map("users")
 }
 
-model Application {
+model MerchantApplication {
+  id             String             @id @default(uuid())
+  userId         String             @unique
+  businessName   String
+  address        String
+  latitude       Float
+  longitude      Float
+  description    String?
+  openTime       String
+  closeTime      String
+  phone          String
+  categories     MerchantCategory[]
+  status         ApplicationStatus  @default(PENDING)
+  rejectedReason String?
+  reviewedAt     DateTime?
+  createdAt      DateTime           @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("merchant_applications")
+}
+
+model Merchant {
   id           String             @id @default(uuid())
-  userId       String
-  merchantName String
-  status       ApplicationStatus  @default(PENDING)
+  userId       String             @unique
+  businessName String
   address      String
   latitude     Float
   longitude    Float
@@ -78,40 +106,20 @@ model Application {
   openTime     String
   closeTime    String
   phone        String
+  logo         String?
   categories   MerchantCategory[]
-  rejectNote   String?
+  status       MerchantStatus     @default(ACTIVE)
 
-  reviewedAt DateTime?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  totalRevenue   Int @default(0)
+  totalSoldItems Int @default(0)
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("applications")
-}
-
-model Merchant {
-  id           String             @id @default(uuid())
-  userId       String             @unique
-  merchantName String
-  address      String
-  latitude     Float
-  longitude    Float
-  description  String?
-  openTime     String // "HH:mm"
-  closeTime    String // "HH:mm"
-  phone        String
-  avatar       String?
-  categories   MerchantCategory[]
-
-  rating       Float @default(0)
-  totalRevenue Int   @default(0)
-  totalPortion Int   @default(0)
+  ratingAvg   Float @default(0)
+  ratingCount Int   @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User          @relation(fields: [userId], references: [id])
   menuItems    MenuItem[]
   surplusItems SurplusItem[]
   orders       Order[]
@@ -121,65 +129,70 @@ model Merchant {
 }
 
 model MenuItem {
-  id            String  @id @default(uuid())
-  merchantId    String
-  name          String
-  description   String?
-  image         String?
-  originalPrice Int
-  isActive      Boolean @default(true) // soft-delete
+  id          String   @id @default(uuid())
+  merchantId  String
+  name        String
+  description String?
+  image       String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  merchant    Merchant     @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  surplusItem SurplusItem?
 
-  merchant    Merchant      @relation(fields: [merchantId], references: [id], onDelete: Cascade)
-  surplusItem SurplusItem[]
-
+  @@index([merchantId])
   @@map("menu_items")
 }
 
 model SurplusItem {
   id            String   @id @default(uuid())
-  menuItemId    String
+  menuItemId    String   @unique
   merchantId    String
+  originalPrice Int
   discountPrice Int
-  originalPrice Int // snapshot
   stock         Int
-  isActive      Boolean  @default(true) // auto-disabled at close time
+  reservedStock Int      @default(0)
+  isActive      Boolean  @default(true)
   date          DateTime @db.Date
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   menuItem   MenuItem    @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
-  merchant   Merchant    @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  merchant   Merchant    @relation(fields: [merchantId], references: [id])
   orderItems OrderItem[]
 
+  @@unique([menuItemId, date])
+  @@index([merchantId, isActive])
+  @@index([date])
   @@map("surplus_items")
 }
 
 model Order {
-  id            String      @id @default(uuid())
-  userId        String
-  merchantId    String
-  status        OrderStatus @default(PENDING)
-  totalAmount   Int
-  totalOriginal Int
-  qrCode        String?     @unique
-  notes         String?
-
+  id          String      @id @default(uuid())
+  userId      String
+  merchantId  String
+  totalAmount Int
+  status      OrderStatus @default(PENDING_PAYMENT)
+  qrToken     String?     @unique
+  notes       String?
   expiredAt   DateTime
   paidAt      DateTime?
   completedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
-  user       User        @relation(fields: [userId], references: [id], onDelete: Restrict)
-  merchant   Merchant    @relation(fields: [merchantId], references: [id], onDelete: Restrict)
+  user       User        @relation(fields: [userId], references: [id])
+  merchant   Merchant    @relation(fields: [merchantId], references: [id])
   orderItems OrderItem[]
   payment    Payment?
   review     Review?
 
+  @@index([userId])
+  @@index([merchantId])
+  @@index([status])
+  @@index([expiredAt])
   @@map("orders")
 }
 
@@ -187,45 +200,59 @@ model OrderItem {
   id            String @id @default(uuid())
   orderId       String
   surplusItemId String
-  name          String // snapshot
   quantity      Int
-  discountPrice Int // snapshot
-  originalPrice Int // snapshot
+  unitPrice     Int
 
   order       Order       @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  surplusItem SurplusItem @relation(fields: [surplusItemId], references: [id], onDelete: Restrict)
+  surplusItem SurplusItem @relation(fields: [surplusItemId], references: [id])
 
+  @@index([orderId])
   @@map("order_items")
 }
 
 model Payment {
-  id            String        @id @default(uuid())
-  orderId       String        @unique
-  transactionId String?       @unique
-  status        PaymentStatus @default(PENDING)
-  amount        Int
+  id              String        @id @default(uuid())
+  orderId         String        @unique
+  midtransOrderId String        @unique
+  transactionId   String?       @unique
+  status          PaymentStatus @default(PENDING)
+  amount          Int
+  qrCodeUrl       String?
+  deeplink        String?
+  webhookPayload  Json?
+  settledAt       DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order Order @relation(fields: [orderId], references: [id])
 
   @@map("payments")
 }
 
 model Review {
-  id         String  @id @default(uuid())
+  id         String   @id @default(uuid())
   userId     String
   merchantId String
-  orderId    String  @unique
+  orderId    String   @unique
   rating     Int
   comment    String?
+  createdAt  DateTime @default(now())
 
-  createdAt DateTime @default(now())
+  user     User     @relation(fields: [userId], references: [id])
+  merchant Merchant @relation(fields: [merchantId], references: [id])
+  order    Order    @relation(fields: [orderId], references: [id])
 
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  merchant Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
-  order    Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
-
+  @@index([merchantId])
   @@map("reviews")
+}
+
+model CustomerStats {
+  userId        String   @id
+  totalSaved    Int      @default(0)
+  totalPortions Int      @default(0)
+  updatedAt     DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("customer_stats")
 }
