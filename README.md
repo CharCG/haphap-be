@@ -1,5 +1,5 @@
 <div align="center">
-	<a><img src="https://res.cloudinary.com/dhq272ra1/image/upload/v1778332157/haphap-logo_sipbze.svg" alt="" width="25%"></a>
+	<a><img src="https://res.cloudinary.com/dhq272ra1/image/upload/v1778337572/haphap-logo_sipbze.png" alt="" width="35%"></a>
 </div>
 
 <div align="center">
