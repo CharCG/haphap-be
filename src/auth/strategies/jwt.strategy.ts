@@ -11,7 +11,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       secretOrKey: process.env.JWT_SECRET || 'HAPHAP_SUPER_SECRET_KEY',
     });
   }
-  
+
   async validate(payload: any) {
     return { userId: payload.sub, email: payload.email, role: payload.role };
   }
