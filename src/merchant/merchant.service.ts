@@ -8,10 +8,7 @@ export class MerchantService {
   constructor(private readonly merchantRepository: MerchantRepository) {}
 
   async findAll(dto: GetMerchantsQueryDto) {
-    const merchants = await this.merchantRepository.findAll(
-      dto.search,
-      dto.categories,
-    );
+    const merchants = await this.merchantRepository.findAll(dto.search, dto.categories);
 
     return merchants.map((m) => ({
       merchantId: m.id,
@@ -60,7 +57,7 @@ export class MerchantService {
 
   async findReviews(merchantId: string) {
     const reviews = await this.merchantRepository.findReviewsByMerchantId(merchantId);
-    
+
     return reviews.map((r) => ({
       reviewId: r.id,
       rating: r.rating,
