@@ -1,4 +1,5 @@
 import { Controller, Get, BadRequestException } from '@nestjs/common';
+import { ActiveRole } from 'generated/prisma/enums';
 
 @Controller()
 export class AppController {
@@ -7,12 +8,12 @@ export class AppController {
     return {
       id: 1,
       name: 'John Doe',
-      role: 'Admin',
+      role: ActiveRole.ADMIN,
     };
   }
   @Get('test-error-string')
   getErrorString() {
-    throw new BadRequestException('Email sudah terdaftar, gunakan email lain');
+    throw new BadRequestException('Email already registered, please use a different email');
   }
 
   @Get('test-error-array')
