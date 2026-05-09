@@ -26,15 +26,15 @@
 
 ## Features
 
-- Authentication & Authorization: JWT-based auth with three roles (Customer, Merchant, Admin). Users can toggle between Customer and Merchant mode.
-- Merchant Registration: Customers submit an application for Admin review. On approval, a Merchant is automatically created.
-- Menu Management: Merchants manage a master menu with soft-delete support.
-- Surplus Listings: Merchants create daily surplus listings from their master menu with custom stock and discount price.
-- Auto-Disable: Unsold surplus items are automatically disabled at the merchant's closing time.
-- Checkout & Pickup: Customers checkout via a per-merchant cart. On payment, a QR code is issued for onsite pickup.
-- Order Completion: Merchants scan the customer's QR code to mark an order as completed.
-- Reviews & Reputation: Customers leave one review per completed order.
-- Gamification: Customers track cumulative Rp saved and total food portions rescued across all orders.
+- **Authentication & Authorization**: JWT-based auth with three roles (Customer, Merchant, Admin).
+- **Merchant Registration**: Customers submit an application for Admin review.
+- **Menu Management**: Merchants manage a master menu as the base for all surplus listings.
+- **Surplus Listings**: Merchants create daily surplus listings from master menu with custom stock and discount price.
+- **Auto-Disable**: Unsold surplus listings are automatically disabled at the merchant's closing time.
+- **Checkout & Pickup**: Customers checkout cart and receive a QR code for onsite pickup.
+- **Order Completion**: Merchants scan the customer's QR code to mark an order as completed.
+- **Reviews & Reputation**: Customers leave one review per completed order.
+- **Gamification**: Customers track cumulative money saved and total food portions rescued across all orders.
 
 ## Getting Started
 
@@ -69,7 +69,7 @@ JWT_EXPIRES_IN=
 
 ### Running
 
-```
+```bash
 # Development
 npm run start:dev
 
