@@ -1,98 +1,165 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+<div align="center">
+	<a><img src="https://res.cloudinary.com/dhq272ra1/image/upload/v1778337572/haphap-logo_sipbze.png" alt="" width="35%"></a>
+</div>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+<div align="center">
+	<a><img src="https://img.shields.io/badge/Node.js-16.x-339933?logo=nodedotjs"></a>
+	<a><img src="https://img.shields.io/badge/NestJS-11.x-E0234E?logo=nestjs"></a>
+	<a><img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript"></a>
+  <a><img src="https://img.shields.io/badge/Prisma-7.x-2D3748?logo=prisma"></a>
+  <a><img src="https://img.shields.io/badge/PostgreSQL-16.x-4169E1?logo=postgresql"></a>
+  <a><img src="https://img.shields.io/badge/Supabase-gray?logo=supabase"></a>
+  <a><img src="https://img.shields.io/badge/Midtrans-gray?logo=data:image/svg+xml;base64,PHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1NS40MiA1OS43OTMiPjxkZWZzPjxzdHlsZT4uY2xzLTF7ZmlsbDojOWRkY2Y5O30uY2xzLTEsLmNscy0yLC5jbHMtM3tmaWxsLXJ1bGU6ZXZlbm9kZDt9LmNscy0ye2ZpbGw6IzAwYWNkYjt9LmNscy0ze2ZpbGw6IzAyNTZhNzt9PC9zdHlsZT48L2RlZnM+PHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMy45NTksNDguMjQzQTMuOTU4LDMuOTU4LDAsMCwxLDAsNDQuMjg1di0yOC44YTMuOTU5LDMuOTU5LDAsMSwxLDcuOTE3LDB2MjguOEEzLjk1OCwzLjk1OCwwLDAsMSwzLjk1OSw0OC4yNDNaIi8+PHBhdGggY2xhc3M9ImNscy0yIiBkPSJNNTEuNDYxLDQ4LjI0M0EzLjk1OCwzLjk1OCwwLDAsMSw0Ny41LDQ0LjI4NVYxNS41MDhhMy45NTksMy45NTksMCwxLDEsNy45MTcsMFY0NC4yODVBMy45NTksMy45NTksMCwwLDEsNTEuNDYxLDQ4LjI0M1oiLz48cGF0aCBjbGFzcz0iY2xzLTMiIGQ9Ik0yNy43MSw1OS43OTNhMy45NiwzLjk2LDAsMCwxLTMuOTU5LTMuOTU5VjMuOTU5YTMuOTU5LDMuOTU5LDAsMSwxLDcuOTE3LDBWNTUuODM0QTMuOTU5LDMuOTU5LDAsMCwxLDI3LjcxLDU5Ljc5M1oiLz48L3N2Zz4="></a>
+</div>
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+[HapHap]() is a dual-sided surplus food marketplace that connects customers with local merchants to rescue the day's high-quality unsold meals at discounted prices — reducing waste while saving money. By actively reducing food waste, the platform directly supports [SDG 12](https://sdgs.un.org/goals/goal12) (Responsible Consumption and Production).
 
-## Project setup
+## Documentation
 
-```bash
-$ npm install
-```
+- [Features](#features)
+- [Getting Started](#getting-started)
+- [Tech Stack](#tech-stack)
+- [Endpoints](#endpoints)
+- [Architecture](#architecture)
 
-## Compile and run the project
+## Features
 
-```bash
-# development
-$ npm run start
+- Authentication & Authorization: JWT-based auth with three roles (Customer, Merchant, Admin). Users can toggle between Customer and Merchant mode.
+- Merchant Registration: Customers submit an application for Admin review. On approval, a Merchant is automatically created.
+- Menu Management: Merchants manage a master menu with soft-delete support.
+- Surplus Listings: Merchants create daily surplus listings from their master menu with custom stock and discount price.
+- Auto-Disable: Unsold surplus items are automatically disabled at the merchant's closing time.
+- Checkout & Pickup: Customers checkout via a per-merchant cart. On payment, a QR code is issued for onsite pickup.
+- Order Completion: Merchants scan the customer's QR code to mark an order as completed.
+- Reviews & Reputation: Customers leave one review per completed order.
+- Gamification: Customers track cumulative Rp saved and total food portions rescued across all orders.
 
-# watch mode
-$ npm run start:dev
+## Getting Started
 
-# production mode
-$ npm run start:prod
-```
+### Prerequisites
 
-## Run tests
+- [Node.js](https://nodejs.org/en) (v16 or higher)
+- [npm](https://www.npmjs.com) or [yarn](https://yarnpkg.com) or [pnpm](https://pnpm.io/id)
+- [PostgreSQL](https://www.postgresql.org) (v16 or higher)
 
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Installation
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+git clone https://github.com/your-org/haphap-backend.git
+cd haphap-backend
+
+npm install
+
+cp .env.example .env
+
+npx prisma generate
+npx prisma migrate dev
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Environment Variables
 
-## Resources
+```
+PORT=
+DATABASE_URL=
+JWT_SECRET=
+JWT_EXPIRES_IN=
+```
 
-Check out a few resources that may come in handy when working with NestJS:
+### Running
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+```
+# Development
+npm run start:dev
 
-## Support
+# Production
+npm run build
+npm run start:prod
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## Endpoints
 
-## Stay in touch
+Base URL: `/api`
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+All endpoints return responses using the following standardized format:
 
-## License
+```json
+{
+	"success": true,
+	"statusCode": 200,
+	"message": "...",
+	"data": { ... }
+}
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+### Auth (`/auth`)
+
+| Method | Endpoint         | Access | Description |
+| ------ | ---------------- | ------ | ----------- |
+| `POST` | `/auth/register` | PUBLIC | \*          |
+| `POST` | `/auth/login`    | PUBLIC | \*          |
+
+### Users (`/users`)
+
+| Method  | Endpoint             | Access             | Description |
+| ------- | -------------------- | ------------------ | ----------- |
+| `GET`   | `/users/me`          | CUSTOMER, MERCHANT | \*          |
+| `PATCH` | `/users/me`          | CUSTOMER, MERCHANT | \*          |
+| `PATCH` | `/users/me/password` | CUSTOMER, MERCHANT | \*          |
+
+### Applications (`/applications`)
+
+| Method  | Endpoint                       | Access   | Description |
+| ------- | ------------------------------ | -------- | ----------- |
+| `GET`   | `/applications`                | ADMIN    | \*          |
+| `GET`   | `/applications/me`             | CUSTOMER | \*          |
+| `POST`  | `/applications`                | CUSTOMER | \*          |
+| `PATCH` | `/applications/:applicationId` | ADMIN    | \*          |
+
+### Merchants (`/merchants`)
+
+| Method  | Endpoint                 | Access   | Description |
+| ------- | ------------------------ | -------- | ----------- |
+| `GET`   | `/merchants`             | PUBLIC   | \*          |
+| `GET`   | `/merchants/:merchantId` | PUBLIC   | \*          |
+| `GET`   | `/merchants/me`          | MERCHANT | \*          |
+| `PATCH` | `/merchants/me`          | MERCHANT | \*          |
+
+### Menus (`/menus`)
+
+| Method   | Endpoint             | Access   | Description |
+| -------- | -------------------- | -------- | ----------- |
+| `GET`    | `/menus`             | MERCHANT | \*          |
+| `POST`   | `/menus`             | MERCHANT | \*          |
+| `PATCH`  | `/menus/:menuItemId` | MERCHANT | \*          |
+| `DELETE` | `/menus/:menuItemId` | MERCHANT | \*          |
+
+### Surplus (`/surplus`)
+
+| Method  | Endpoint                  | Access   | Description |
+| ------- | ------------------------- | -------- | ----------- |
+| `GET`   | `/surplus`                | MERCHANT | \*          |
+| `POST`  | `/surplus`                | MERCHANT | \*          |
+| `PATCH` | `/surplus/:surplusItemId` | MERCHANT | \*          |
+
+### Orders (`/orders`)
+
+| Method  | Endpoint           | Access             | Description |
+| ------- | ------------------ | ------------------ | ----------- |
+| `POST`  | `/orders`          | CUSTOMER           | \*          |
+| `GET`   | `/orders/:orderId` | CUSTOMER, MERCHANT | \*          |
+| `GET`   | `/orders/me`       | CUSTOMER           | \*          |
+| `GET`   | `/orders/merchant` | MERCHANT           | \*          |
+| `PATCH` | `/orders/scan`     | MERCHANT           | \*          |
+
+### Reviews (`/reviews`)
+
+| Method | Endpoint                         | Access   | Description |
+| ------ | -------------------------------- | -------- | ----------- |
+| `POST` | `/reviews`                       | CUSTOMER | \*          |
+| `GET`  | `/merchants/:merchantId/reviews` | PUBLIC   | \*          |
+
+## Architecture
+
+<img src="https://res.cloudinary.com/dhq272ra1/image/upload/v1778335168/Context_hs21ti.png">
