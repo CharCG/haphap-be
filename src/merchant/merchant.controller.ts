@@ -14,8 +14,22 @@ export class MerchantController {
   constructor(private readonly merchantService: MerchantService) {}
 
   @Get()
-  async getAll(@Query() dto: GetMerchantsQueryDto) {
+  async findAll(@Query() dto: GetMerchantsQueryDto) {
     return this.merchantService.findAll(dto);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.MERCHANT)
+  @Get('me')
+  async getMe(@CurrentUser() user: CurrentUserDto) {
+    return this.merchantService.getMe(user.id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.MERCHANT)
+  @Patch('me')
+  async updateMe(@CurrentUser() user: CurrentUserDto, @Body() dto: UpdateMerchantDto) {
+    return this.merchantService.updateMe(user.id, dto);
   }
 
   @Get(':merchantId')
@@ -26,19 +40,5 @@ export class MerchantController {
   @Get(':merchantId/reviews')
   async findReviews(@Param('merchantId') id: string) {
     return this.merchantService.findReviews(id);
-  }
-
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.MERCHANT)
-  @Get('me')
-  async findMe(@CurrentUser() user: CurrentUserDto) {
-    return this.merchantService.findMe(user.id);
-  }
-
-  @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.MERCHANT)
-  @Patch('me')
-  async updateMe(@CurrentUser() user: CurrentUserDto, @Body() dto: UpdateMerchantDto) {
-    return this.merchantService.updateMe(user.id, dto);
   }
 }
