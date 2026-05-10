@@ -33,38 +33,9 @@ export class MerchantRepository {
     });
   }
 
-  async findByIdWithSurplus(id: string) {
+  async findByUserId(id: string) {
     return this.prismaService.merchant.findUnique({
       where: { id },
-      include: {
-        surplusItems: {
-          where: { isActive: true },
-          include: {
-            menuItem: true,
-          },
-        },
-      },
-    });
-  }
-
-  async findReviewsByMerchantId(merchantId: string) {
-    return this.prismaService.review.findMany({
-      where: { merchantId },
-      include: {
-        user: {
-          select: {
-            name: true,
-            avatar: true,
-          },
-        },
-      },
-      orderBy: { createdAt: 'desc' },
-    });
-  }
-
-  async findByUserId(userId: string) {
-    return this.prismaService.merchant.findUnique({
-      where: { userId },
     });
   }
 
@@ -81,6 +52,35 @@ export class MerchantRepository {
         categories: true,
         updatedAt: true,
       },
+    });
+  }
+
+  async findByIdWithSurplus(id: string) {
+    return this.prismaService.merchant.findUnique({
+      where: { id },
+      include: {
+        surplusItems: {
+          where: { isActive: true },
+          include: {
+            menuItem: true,
+          },
+        },
+      },
+    });
+  }
+
+  async findReviewsByMerchantId(id: string) {
+    return this.prismaService.review.findMany({
+      where: { id },
+      include: {
+        user: {
+          select: {
+            name: true,
+            avatar: true,
+          },
+        },
+      },
+      orderBy: { createdAt: 'desc' },
     });
   }
 }
