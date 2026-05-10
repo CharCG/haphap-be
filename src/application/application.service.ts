@@ -73,9 +73,9 @@ export class ApplicationService {
     let updatedApp;
 
     if (dto.status === ApplicationStatus.APPROVED) {
-      updatedApp = await this.applicationRepository.approve(applicationId, application);
+      updatedApp = await this.applicationRepository.updateStatusApprove(applicationId, application);
     } else {
-      updatedApp = await this.applicationRepository.reject(applicationId, dto.status, dto.rejectNote);
+      updatedApp = await this.applicationRepository.updateStatusReject(applicationId, dto.status, dto.rejectNote);
     }
 
     return {

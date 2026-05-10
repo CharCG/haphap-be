@@ -38,7 +38,7 @@ export class ApplicationRepository {
     });
   }
 
-  async reject(applicationId: string, status: ApplicationStatus, rejectNote?: string) {
+  async updateStatusReject(applicationId: string, status: ApplicationStatus, rejectNote?: string) {
     return this.prismaService.application.update({
       where: { id: applicationId },
       data: {
@@ -49,7 +49,7 @@ export class ApplicationRepository {
     });
   }
 
-  async approve(applicationId: string, application: any) {
+  async updateStatusApprove(applicationId: string, application: any) {
     return this.prismaService.$transaction(async (prisma) => {
       const updatedApp = await prisma.application.update({
         where: { id: applicationId },
