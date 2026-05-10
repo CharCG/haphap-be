@@ -47,8 +47,8 @@
 ### Installation
 
 ```bash
-git clone https://github.com/your-org/haphap-backend.git
-cd haphap-backend
+git clone https://github.com/charcg/haphap-be.git
+cd haphap-be
 
 npm install
 
