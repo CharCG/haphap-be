@@ -33,12 +33,12 @@ export class MerchantController {
   }
 
   @Get(':merchantId')
-  async findOne(@Param('merchantId') id: string) {
-    return this.merchantService.findOne(id);
+  async findOne(@Param('merchantId') merchantId: string) {
+    return this.merchantService.findOne(merchantId);
   }
 
   @Get(':merchantId/reviews')
-  async findReviews(@Param('merchantId') id: string) {
-    return this.merchantService.findReviews(id);
+  async findReviews(@Param('merchantId') merchantId: string) {
+    return this.merchantService.findReviews(merchantId);
   }
 }

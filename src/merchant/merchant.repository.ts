@@ -33,15 +33,15 @@ export class MerchantRepository {
     });
   }
 
-  async findByUserId(id: string) {
+  async findByUserId(userId: string) {
     return this.prismaService.merchant.findUnique({
-      where: { id },
+      where: { userId },
     });
   }
 
-  async update(id: string, data: Prisma.MerchantUpdateInput) {
+  async update(merchantId: string, data: Prisma.MerchantUpdateInput) {
     return this.prismaService.merchant.update({
-      where: { id },
+      where: { id: merchantId },
       data,
       select: {
         id: true,
@@ -55,9 +55,9 @@ export class MerchantRepository {
     });
   }
 
-  async findByIdWithSurplus(id: string) {
+  async findByIdWithSurplus(merchantId: string) {
     return this.prismaService.merchant.findUnique({
-      where: { id },
+      where: { id: merchantId },
       include: {
         surplusItems: {
           where: { isActive: true },
@@ -69,9 +69,9 @@ export class MerchantRepository {
     });
   }
 
-  async findReviewsByMerchantId(id: string) {
+  async findReviewsByMerchantId(merchantId: string) {
     return this.prismaService.review.findMany({
-      where: { id },
+      where: { id: merchantId },
       include: {
         user: {
           select: {

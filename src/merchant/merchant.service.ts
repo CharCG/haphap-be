@@ -68,8 +68,8 @@ export class MerchantService {
     };
   }
 
-  async findOne(id: string) {
-    const merchant = await this.merchantRepository.findByIdWithSurplus(id);
+  async findOne(merchantId: string) {
+    const merchant = await this.merchantRepository.findByIdWithSurplus(merchantId);
 
     if (!merchant) {
       throw new NotFoundException('Merchant not found');
