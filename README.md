@@ -14,7 +14,7 @@
 
 ## Description
 
-[HapHap]() is a dual-sided surplus food marketplace that connects customers with local merchants to rescue the day's high-quality unsold meals at discounted prices — reducing waste while saving money. By actively reducing food waste, the platform directly supports [SDG 12](https://sdgs.un.org/goals/goal12) (Responsible Consumption and Production).
+[HapHap]() is a dual-sided surplus food marketplace that connects customers with local merchants to rescue the day's high-quality unsold meals at discounted prices. By actively reducing food waste, the platform directly supports [SDG 12](https://sdgs.un.org/goals/goal12) (Responsible Consumption and Production).
 
 ## Documentation
 
