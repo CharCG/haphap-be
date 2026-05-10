@@ -6,9 +6,9 @@ import { Prisma } from 'generated/prisma/client';
 export class UserRepository {
   constructor(private readonly prismaService: PrismaService) {}
 
-  async findById(id: string) {
+  async findById(userId: string) {
     return this.prismaService.user.findUnique({
-      where: { id },
+      where: { id: userId },
     });
   }
 
@@ -18,9 +18,9 @@ export class UserRepository {
     });
   }
 
-  async update(id: string, data: Prisma.UserUpdateInput) {
+  async update(userId: string, data: Prisma.UserUpdateInput) {
     return this.prismaService.user.update({
-      where: { id },
+      where: { id: userId },
       data,
     });
   }

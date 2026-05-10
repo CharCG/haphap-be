@@ -8,8 +8,8 @@ import * as bcrypt from 'bcrypt';
 export class UserService {
   constructor(private readonly userRepository: UserRepository) {}
 
-  async getMe(id: string) {
-    const user = await this.userRepository.findById(id);
+  async getMe(userId: string) {
+    const user = await this.userRepository.findById(userId);
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -26,15 +26,15 @@ export class UserService {
     };
   }
 
-  async updateMe(id: string, dto: UpdateUserDto) {
+  async updateMe(userId: string, dto: UpdateUserDto) {
     if (dto.email) {
       const existingUser = await this.userRepository.findByEmail(dto.email);
-      if (existingUser && existingUser.id !== id) {
+      if (existingUser && existingUser.id !== userId) {
         throw new BadRequestException('Email is already in use');
       }
     }
 
-    const updatedUser = await this.userRepository.update(id, dto);
+    const updatedUser = await this.userRepository.update(userId, dto);
 
     return {
       userId: updatedUser.id,
@@ -45,8 +45,8 @@ export class UserService {
     };
   }
 
-  async updatePassword(id: string, dto: UpdatePasswordDto) {
-    const user = await this.userRepository.findById(id);
+  async updatePassword(userId: string, dto: UpdatePasswordDto) {
+    const user = await this.userRepository.findById(userId);
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -59,7 +59,7 @@ export class UserService {
     }
 
     const hashedPassword = await bcrypt.hash(dto.newPassword, 10);
-    const updatedUser = await this.userRepository.update(id, { password: hashedPassword });
+    const updatedUser = await this.userRepository.update(userId, { password: hashedPassword });
 
     return {
       userId: updatedUser.id,
