@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { MerchantModule } from './merchant/merchant.module';
 import { UserModule } from './user/user.module';
 import { ReviewModule } from './review/review.module';
+import { ApplicationModule } from './application/application.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { ReviewModule } from './review/review.module';
     MerchantModule,
     UserModule,
     ReviewModule,
+    ApplicationModule,
   ],
   controllers: [AppController],
   providers: [],
