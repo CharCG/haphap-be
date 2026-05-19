@@ -7,6 +7,7 @@ import { MerchantModule } from './merchant/merchant.module';
 import { UserModule } from './user/user.module';
 import { ReviewModule } from './review/review.module';
 import { ApplicationModule } from './application/application.module';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { ApplicationModule } from './application/application.module';
     UserModule,
     ReviewModule,
     ApplicationModule,
+    OrdersModule,
   ],
   controllers: [AppController],
   providers: [],
