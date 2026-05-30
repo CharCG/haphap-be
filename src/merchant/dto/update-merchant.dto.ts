@@ -1,5 +1,5 @@
 import { IsArray, IsEnum, IsOptional, IsString, Matches } from 'class-validator';
-import { MerchantCategory } from '../../../generated/prisma/enums';
+import { MerchantCategory } from '../../generated/prisma/enums';
 
 export class UpdateMerchantDto {
   @IsOptional()

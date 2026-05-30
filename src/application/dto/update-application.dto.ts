@@ -1,5 +1,5 @@
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { ApplicationStatus } from 'generated/prisma/client';
+import { ApplicationStatus } from '../../generated/prisma/enums';
 
 export class UpdateApplicationDto {
   @IsNotEmpty()

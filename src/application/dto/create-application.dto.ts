@@ -1,5 +1,5 @@
 import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Matches } from 'class-validator';
-import { MerchantCategory } from 'generated/prisma/client';
+import { MerchantCategory } from '../../generated/prisma/enums';
 
 export class CreateApplicationDto {
   @IsNotEmpty()
