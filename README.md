@@ -1,5 +1,5 @@
 <div align="center">
-	<a><img src="https://res.cloudinary.com/dhq272ra1/image/upload/v1778337572/haphap-logo_sipbze.png" alt="" width="35%"></a>
+	<a><img src="https://res.cloudinary.com/dmis04mcg/image/upload/v1780150130/haphap-logo_shcwvc.png" alt="" width="35%"></a>
 </div>
 
 <div align="center">
@@ -23,6 +23,7 @@
 - [Tech Stack](#tech-stack)
 - [Endpoints](#endpoints)
 - [Architecture](#architecture)
+- [Appendix](#appendix)
 
 ## Features
 
@@ -61,10 +62,21 @@ npx prisma migrate dev
 ### Environment Variables
 
 ```
+NODE_ENV=
 PORT=
+
 DATABASE_URL=
+
 JWT_SECRET=
 JWT_EXPIRES_IN=
+
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_CALLBACK_URL=
+
+MIDTRANS_SERVER_KEY=
+MIDTRANS_CLIENT_KEY=
+MIDTRANS_IS_PRODUCTION=
 ```
 
 ### Running
@@ -162,4 +174,8 @@ All endpoints return responses using the following standardized format:
 
 ## Architecture
 
-<img src="https://res.cloudinary.com/dhq272ra1/image/upload/v1778335168/Context_hs21ti.png">
+<img src="https://res.cloudinary.com/dmis04mcg/image/upload/v1780150374/haphap-architecture_d4lia5.png">
+
+## Appendix
+
+<img src="https://res.cloudinary.com/dmis04mcg/image/upload/v1780150389/haphap-ad_haovn2.png">
