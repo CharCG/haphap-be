@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/co
 import { ApplicationService } from './application.service';
 import { JwtAuthGuard } from '../../src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../src/auth/guards/roles.guard';
-import { Roles } from '../../src/common/decorators/roles.decorator';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../generated/prisma/enums';
 import { CurrentUser } from '../../src/common/decorators/current-user.decorator';
 import { CurrentUserDto } from '../../src/common/dto/current-user.dto';

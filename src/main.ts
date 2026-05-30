@@ -9,7 +9,6 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors();
-  app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new ResponseInterceptor());
@@ -20,8 +19,8 @@ async function bootstrap() {
     .setVersion('0.0')
     .build();
   const documentFactory = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, documentFactory);
+  SwaggerModule.setup('api', app, documentFactory);
 
-  await app.listen(process.env.PORT || 3000);
+  await app.listen(process.env.PORT!);
 }
 bootstrap();
