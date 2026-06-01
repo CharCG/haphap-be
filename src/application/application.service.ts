@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { ApplicationRepository } from './application.repository';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { UpdateApplicationDto } from './dto/update-application.dto';
-import { ApplicationStatus } from 'generated/prisma/enums';
+import { ApplicationStatus } from '../generated/prisma/enums';
 
 @Injectable()
 export class ApplicationService {

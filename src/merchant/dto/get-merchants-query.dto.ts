@@ -1,6 +1,6 @@
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { MerchantCategory } from 'generated/prisma/enums';
+import { MerchantCategory } from '../../generated/prisma/enums';
 
 export class GetMerchantsQueryDto {
   @IsOptional()

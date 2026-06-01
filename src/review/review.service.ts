@@ -10,7 +10,7 @@ export class ReviewService {
     const existingReview = await this.reviewRepository.findByOrderId(dto.orderId);
 
     if (existingReview) {
-      throw new BadRequestException('This order has already been reviewed');
+      throw new BadRequestException('Order has already been reviewed');
     }
 
     const review = await this.reviewRepository.create({
