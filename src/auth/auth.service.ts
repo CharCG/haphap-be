@@ -16,7 +16,7 @@ export class AuthService {
     const existingUser = await this.authRepository.findByEmail(dto.email);
 
     if (existingUser) {
-      throw new BadRequestException('Email already exist');
+      throw new BadRequestException('Email already exists');
     }
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);

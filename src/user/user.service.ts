@@ -30,7 +30,7 @@ export class UserService {
     if (dto.email) {
       const existingUser = await this.userRepository.findByEmail(dto.email);
       if (existingUser && existingUser.id !== userId) {
-        throw new BadRequestException('Email is already in use');
+        throw new BadRequestException('Email already exists');
       }
     }
 
@@ -55,7 +55,7 @@ export class UserService {
     const isPasswordValid = await bcrypt.compare(dto.currentPassword, user.password);
 
     if (!isPasswordValid) {
-      throw new BadRequestException('Invalid current password');
+      throw new BadRequestException('Invalid credentials');
     }
 
     const hashedPassword = await bcrypt.hash(dto.newPassword, 10);
