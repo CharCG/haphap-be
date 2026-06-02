@@ -1,10 +1,14 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { OrderStatus, Prisma } from '../generated/prisma/client';
+import { QrCodeUtil } from 'src/common/utils/qrcode.util';
 
 @Injectable()
 export class OrderRepository {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly qrCodeUtil: QrCodeUtil,
+  ) {}
 
   async findById(orderId: string) {
     return this.prismaService.order.findUnique({
@@ -91,6 +95,7 @@ export class OrderRepository {
           totalOriginal,
           notes,
           expiredAt,
+          qrCode: '',
           orderItems: {
             createMany: { data: orderItemsData },
           },
@@ -98,7 +103,17 @@ export class OrderRepository {
         include: { orderItems: true },
       });
 
-      return order;
+      const qrCode = await this.qrCodeUtil.generateToken(order.id);
+
+      const updatedOrder = await prisma.order.update({
+        where: { id: order.id },
+        data: {
+          qrCode: qrCode,
+        },
+        include: { orderItems: true },
+      });
+
+      return updatedOrder;
     });
   }
 

@@ -3,10 +3,14 @@ import { OrderRepository } from './order.repository';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { CurrentUserDto } from 'src/common/dto/current-user.dto';
 import { Role } from '../generated/prisma/enums';
+import { QrCodeUtil } from 'src/common/utils/qrcode.util';
 
 @Injectable()
 export class OrderService {
-  constructor(private readonly orderRepository: OrderRepository) {}
+  constructor(
+    private readonly orderRepository: OrderRepository,
+    private readonly qrCodeUtil: QrCodeUtil,
+  ) {}
 
   async create(userId: string, dto: CreateOrderDto) {
     const order = await this.orderRepository.create(userId, dto.merchantId, dto.notes, dto.orderItems);
@@ -14,6 +18,7 @@ export class OrderService {
       orderId: order.id,
       totalAmount: order.totalAmount,
       expiredAt: order.expiredAt,
+      qrCode: order.qrCode,
     };
   }
 
@@ -51,7 +56,7 @@ export class OrderService {
       throw new ForbiddenException('You are not authorized to scan this order');
     } else if (order.status !== 'PENDING') {
       throw new BadRequestException('Order is not in a valid state to be scanned');
-    } else if (order.qrCode !== qrCode) {
+    } else if (!this.qrCodeUtil.validateToken(orderId, qrCode)) {
       throw new BadRequestException('Invalid QR code');
     }
 
