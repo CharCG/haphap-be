@@ -41,4 +41,20 @@ export class OrderService {
   async findOrderMerchant(merchantId: string) {
     return this.orderRepository.findByMerchantId(merchantId);
   }
+
+  async scanOrder(orderId: string, merchantId: string, qrCode: string) {
+    const order = await this.orderRepository.findById(orderId);
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    } else if (order.merchant.userId !== merchantId) {
+      throw new ForbiddenException('You are not authorized to scan this order');
+    } else if (order.status !== 'PENDING') {
+      throw new BadRequestException('Order is not in a valid state to be scanned');
+    } else if (order.qrCode !== qrCode) {
+      throw new BadRequestException('Invalid QR code');
+    }
+
+    return await this.orderRepository.updateOrderStatus(orderId, 'COMPLETED', new Date());
+  }
 }

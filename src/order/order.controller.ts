@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Request, Get, Param } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Request, Get, Param, Patch } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
@@ -37,7 +37,9 @@ export class OrderController {
     return await this.orderService.findOrderMerchant(user.id);
   }
   
-  // @Patch('scan')
-  // @Roles(Role.MERCHANT)
-  // async scanOrder(@Param('orderId') orderId: string)
+  @Patch(':orderId/scan')
+  @Roles(Role.MERCHANT)
+  async scanOrder(@Param('orderId') orderId: string, @CurrentUser() currentUser: CurrentUserDto, @Body() dto: { qrCode: string }) {
+    return await this.orderService.scanOrder(orderId, currentUser.id, dto.qrCode);
+  }
 } 

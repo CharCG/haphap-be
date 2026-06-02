@@ -101,4 +101,15 @@ export class OrderRepository {
       return order;
     });
   }
+
+  async updateOrderStatus(orderId: string, status: OrderStatus, paidAt?: Date) {
+    return this.prismaService.order.update({
+      where: { id: orderId },
+      data: {
+        status,
+        paidAt: paidAt,
+      },
+      include: { orderItems: true },
+    });
+  }
 }
