@@ -6,6 +6,8 @@ import { MerchantModule } from './merchant/merchant.module';
 import { UserModule } from './user/user.module';
 import { ReviewModule } from './review/review.module';
 import { ApplicationModule } from './application/application.module';
+import { PaymentModule } from './payment/payment.module';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -18,6 +20,8 @@ import { ApplicationModule } from './application/application.module';
     UserModule,
     ReviewModule,
     ApplicationModule,
+    PaymentModule,
+    OrderModule,
   ],
   controllers: [],
   providers: [],

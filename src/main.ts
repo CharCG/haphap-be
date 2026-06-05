@@ -17,6 +17,7 @@ async function bootstrap() {
     .setTitle('HapHap API')
     .setDescription('Documentation for HapHap API')
     .setVersion('0.0')
+    .addBearerAuth()
     .build();
   const documentFactory = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, documentFactory);
