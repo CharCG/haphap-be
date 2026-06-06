@@ -57,7 +57,7 @@ export class MerchantService {
         description: surplusItem.menuItem.description,
         image: surplusItem.menuItem.image,
         discountPrice: surplusItem.discountPrice,
-        originalPrice: surplusItem.menuItem.originalPrice,
+        originalPrice: surplusItem.originalPrice,
         stock: surplusItem.stock,
       })),
     };

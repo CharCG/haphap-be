@@ -53,12 +53,12 @@ export class PaymentService {
       where: { orderId },
       create: {
         order: { connect: { id: orderId } },
-        amount: order.totalAmount,
         status: PaymentStatus.PENDING,
+        amount: order.totalAmount,
       },
       update: {
-        transactionId: null,
         status: PaymentStatus.PENDING,
+        transactionId: null,
       },
     });
 
@@ -70,14 +70,22 @@ export class PaymentService {
       customerPhone: order.user.phone,
     });
 
+    const updatedPayment = await this.prismaService.payment.update({
+      where: { id: payment.id },
+      data: {
+        snapToken: token,
+        redirectUrl,
+      },
+    });
+
     return {
-      paymentId: payment.id,
-      orderId: payment.orderId,
-      status: payment.status,
-      amount: payment.amount,
-      snapToken: token,
-      redirectUrl,
-      createdAt: payment.createdAt,
+      paymentId: updatedPayment.id,
+      orderId: updatedPayment.orderId,
+      status: updatedPayment.status,
+      amount: updatedPayment.amount,
+      snapToken: updatedPayment.snapToken,
+      redirectUrl: updatedPayment.redirectUrl,
+      createdAt: updatedPayment.createdAt,
     };
   }
 

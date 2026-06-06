@@ -76,19 +76,6 @@ export class SurplusService {
     const merchantId = await this.getMerchantIdByUserId(userId);
     const menuItem = await this.validateMenuOwner(dto.menuItemId, merchantId);
 
-    const existingSurplusItem = await this.prismaService.surplusItem.findFirst({
-      where: {
-        menuItemId: dto.menuItemId,
-        merchantId: merchantId,
-        date: new Date(new Date().toDateString()),
-        isActive: true,
-      },
-    });
-
-    if (existingSurplusItem) {
-      throw new BadRequestException('Surplus item already exists for this menu today');
-    }
-
     const surplusItem = await this.prismaService.surplusItem.create({
       data: {
         ...dto,

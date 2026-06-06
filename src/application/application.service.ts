@@ -92,7 +92,10 @@ export class ApplicationService {
     if (dto.status === ApplicationStatus.APPROVED) {
       updatedApp = await this.prismaService.application.update({
         where: { id: applicationId },
-        data: { status: dto.status },
+        data: { 
+          status: dto.status, 
+          reviewedAt: new Date(),
+        },
       });
 
       await this.prismaService.merchant.create({
@@ -112,7 +115,11 @@ export class ApplicationService {
     } else {
       updatedApp = await this.prismaService.application.update({
         where: { id: applicationId },
-        data: { status: dto.status, rejectNote: dto.rejectNote, reviewedAt: new Date() },
+        data: { 
+          status: dto.status, 
+          rejectNote: dto.rejectNote, 
+          reviewedAt: new Date() 
+        },
       });
     }
 
