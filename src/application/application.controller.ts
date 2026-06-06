@@ -8,7 +8,6 @@ import { CurrentUser } from '../../src/common/decorators/current-user.decorator'
 import { CurrentUserDto } from '../../src/common/dto/current-user.dto';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { UpdateApplicationDto } from './dto/update-application.dto';
-
 import { ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiBearerAuth()
@@ -23,12 +22,6 @@ export class ApplicationController {
     return this.applicationService.findAll();
   }
 
-  @Get('me')
-  @Roles(Role.CUSTOMER)
-  async findMyApplications(@CurrentUser() user: CurrentUserDto) {
-    return this.applicationService.findMyApplications(user.id);
-  }
-
   @Post()
   @Roles(Role.CUSTOMER)
   async create(@CurrentUser() user: CurrentUserDto, @Body() dto: CreateApplicationDto) {
@@ -39,5 +32,11 @@ export class ApplicationController {
   @Roles(Role.ADMIN)
   async updateStatus(@Param('applicationId') applicationId: string, @Body() dto: UpdateApplicationDto) {
     return this.applicationService.updateStatus(applicationId, dto);
+  }
+
+  @Get('me')
+  @Roles(Role.CUSTOMER)
+  async findMyApplications(@CurrentUser() user: CurrentUserDto) {
+    return this.applicationService.findMyApplications(user.id);
   }
 }

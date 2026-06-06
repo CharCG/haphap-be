@@ -24,7 +24,7 @@ import { MenuModule } from './menu/menu.module';
     ApplicationModule,
     PaymentModule,
     OrderModule,
-    SurplusModule
+    SurplusModule,
     MenuModule,
   ],
   controllers: [],

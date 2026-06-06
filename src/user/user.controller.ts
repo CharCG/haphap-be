@@ -8,7 +8,6 @@ import { CurrentUser } from '../../src/common/decorators/current-user.decorator'
 import { CurrentUserDto } from '../../src/common/dto/current-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-
 import { ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiBearerAuth()
@@ -29,7 +28,7 @@ export class UserController {
   }
 
   @Patch('me/password')
-  async updatePassword(@CurrentUser() user: CurrentUserDto, @Body() dto: UpdatePasswordDto) {
-    return this.userService.updatePassword(user.id, dto);
+  async updateMyPassword(@CurrentUser() user: CurrentUserDto, @Body() dto: UpdatePasswordDto) {
+    return this.userService.updateMyPassword(user.id, dto);
   }
 }

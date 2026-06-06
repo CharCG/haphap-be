@@ -7,10 +7,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
 
-    const exceptionStatus =
-      exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
-    const exceptionResponse =
-      exception instanceof HttpException ? exception.getResponse() : { message: 'Internal server error' };
+    const exceptionStatus = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+    const exceptionResponse = exception instanceof HttpException ? exception.getResponse() : { message: 'Internal server error' };
 
     let errorMessage = 'An unexpected error occurred';
     if (typeof exceptionResponse === 'string') {
@@ -19,9 +17,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
       const msg = (exceptionResponse as any).message;
       errorMessage = Array.isArray(msg) ? msg[0] : msg;
     }
-
-    // Print error to terminal log
-    console.error('Unhandled Exception Caught:', exception);
 
     response.status(exceptionStatus).json({
       success: false,
