@@ -20,6 +20,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
       errorMessage = Array.isArray(msg) ? msg[0] : msg;
     }
 
+    // Print error to terminal log
+    console.error('Unhandled Exception Caught:', exception);
+
     response.status(exceptionStatus).json({
       success: false,
       statusCode: exceptionStatus,

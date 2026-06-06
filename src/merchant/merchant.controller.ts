@@ -9,6 +9,8 @@ import { CurrentUserDto } from '../../src/common/dto/current-user.dto';
 import { GetMerchantsQueryDto } from './dto/get-merchants-query.dto';
 import { UpdateMerchantDto } from './dto/update-merchant.dto';
 
+import { ApiBearerAuth } from '@nestjs/swagger';
+
 @Controller('merchants')
 export class MerchantController {
   constructor(private readonly merchantService: MerchantService) {}
@@ -18,6 +20,7 @@ export class MerchantController {
     return this.merchantService.findAll(dto);
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.MERCHANT)
   @Get('me')
@@ -25,6 +28,7 @@ export class MerchantController {
     return this.merchantService.getMe(user.id);
   }
 
+  @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.MERCHANT)
   @Patch('me')
