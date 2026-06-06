@@ -16,9 +16,4 @@ export class UpdateUserDto {
   @IsString()
   @ApiProperty()
   phone?: string;
-
-  @IsOptional()
-  @IsString()
-  @ApiProperty()
-  avatar?: string;
 }

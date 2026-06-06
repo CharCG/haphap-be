@@ -1,11 +1,17 @@
-import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
+import { StorageService } from '../storage/storage.service';
 import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
 
 @Injectable()
 export class MenuService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly storageService: StorageService,
+    private readonly configService: ConfigService,
+  ) {}
 
   private async getMerchantIdByUserId(userId: string): Promise<string> {
     const merchant = await this.prismaService.merchant.findUnique({
@@ -89,7 +95,6 @@ export class MenuService {
       menuItemId: menuItem.id,
       name: menuItem.name,
       description: menuItem.description,
-      image: menuItem.image,
       originalPrice: menuItem.originalPrice,
       isActive: menuItem.isActive,
       createdAt: menuItem.createdAt,
@@ -109,7 +114,6 @@ export class MenuService {
       menuItemId: updatedMenuItem.id,
       name: updatedMenuItem.name,
       description: updatedMenuItem.description,
-      image: updatedMenuItem.image,
       originalPrice: updatedMenuItem.originalPrice,
       isActive: updatedMenuItem.isActive,
       updatedAt: updatedMenuItem.updatedAt,
@@ -129,6 +133,29 @@ export class MenuService {
       menuItemId: deletedMenuItem.id,
       isActive: deletedMenuItem.isActive,
       updatedAt: deletedMenuItem.updatedAt,
+    };
+  }
+
+  async uploadImage(userId: string, menuItemId: string, file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('File is required');
+    }
+
+    const merchantId = await this.getMerchantIdByUserId(userId);
+    await this.validateMenuOwner(menuItemId, merchantId);
+
+    const bucketName = this.configService.get<string>('SUPABASE_MENU_BUCKET')!;
+    const imageUrl = await this.storageService.uploadFile(file, bucketName, menuItemId);
+
+    const updatedMenuItem = await this.prismaService.menuItem.update({
+      where: { id: menuItemId },
+      data: { image: imageUrl },
+    });
+
+    return {
+      menuItemId: updatedMenuItem.id,
+      image: updatedMenuItem.image,
+      updatedAt: updatedMenuItem.updatedAt,
     };
   }
 }

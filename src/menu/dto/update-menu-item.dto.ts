@@ -13,11 +13,6 @@ export class UpdateMenuItemDto {
   description?: string;
 
   @IsOptional()
-  @IsString()
-  @ApiProperty()
-  image?: string;
-
-  @IsOptional()
   @IsInt()
   @Min(1)
   @ApiProperty()

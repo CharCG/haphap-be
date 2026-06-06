@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { MenuService } from './menu.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -44,5 +45,15 @@ export class MenuController {
   @Delete(':menuItemId')
   async remove(@CurrentUser() user: CurrentUserDto, @Param('menuItemId') menuItemId: string) {
     return this.menuService.remove(user.id, menuItemId);
+  }
+
+  @Post(':menuItemId/image')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadImage(
+    @CurrentUser() user: CurrentUserDto,
+    @Param('menuItemId') menuItemId: string,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.menuService.uploadImage(user.id, menuItemId, file);
   }
 }

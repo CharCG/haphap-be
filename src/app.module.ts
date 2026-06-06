@@ -10,6 +10,7 @@ import { PaymentModule } from './payment/payment.module';
 import { OrderModule } from './order/order.module';
 import { SurplusModule } from './surplus/surplus.module';
 import { MenuModule } from './menu/menu.module';
+import { StorageModule } from './storage/storage.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { MenuModule } from './menu/menu.module';
     OrderModule,
     SurplusModule,
     MenuModule,
+    StorageModule,
   ],
   controllers: [],
   providers: [],

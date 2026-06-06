@@ -12,11 +12,6 @@ export class CreateMenuItemDto {
   @ApiProperty()
   description?: string;
 
-  @IsOptional()
-  @IsString()
-  @ApiProperty()
-  image?: string;
-
   @IsNotEmpty()
   @IsInt()
   @Min(1)

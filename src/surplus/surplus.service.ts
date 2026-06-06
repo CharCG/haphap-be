@@ -86,7 +86,7 @@ export class SurplusService {
     });
 
     if (existingSurplusItem) {
-      throw new BadRequestException('Surplus item for this menu already exists today');
+      throw new BadRequestException('Surplus item already exists for this menu today');
     }
 
     const surplusItem = await this.prismaService.surplusItem.create({

@@ -1,12 +1,18 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../src/prisma/prisma.service';
+import { StorageService } from '../storage/storage.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly storageService: StorageService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async getMe(userId: string) {
     const user = await this.prismaService.user.findUnique({
@@ -33,6 +39,7 @@ export class UserService {
       const existingUser = await this.prismaService.user.findUnique({
         where: { email: dto.email },
       });
+
       if (existingUser && existingUser.id !== userId) {
         throw new BadRequestException('Email already exists');
       }
@@ -47,7 +54,6 @@ export class UserService {
       userId: updatedUser.id,
       name: updatedUser.name,
       email: updatedUser.email,
-      avatar: updatedUser.avatar,
       updatedAt: updatedUser.updatedAt,
     };
   }
@@ -76,6 +82,26 @@ export class UserService {
 
     return {
       userId: updatedUser.id,
+      updatedAt: updatedUser.updatedAt,
+    };
+  }
+
+  async uploadAvatar(userId: string, file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('File is required');
+    }
+
+    const bucketName = this.configService.get<string>('SUPABASE_USER_BUCKET')!;
+    const avatarUrl = await this.storageService.uploadFile(file, bucketName, userId);
+
+    const updatedUser = await this.prismaService.user.update({
+      where: { id: userId },
+      data: { avatar: avatarUrl },
+    });
+
+    return {
+      userId: updatedUser.id,
+      avatar: updatedUser.avatar,
       updatedAt: updatedUser.updatedAt,
     };
   }
