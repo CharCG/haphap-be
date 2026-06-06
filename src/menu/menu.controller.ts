@@ -27,7 +27,7 @@ export class MenuController {
     return this.menuService.create(user.id, dto);
   }
 
-  @Get()
+  @Get(':menuItemId')
   async findOne(@CurrentUser() user: CurrentUserDto, @Param('menuItemId') menuItemId: string) {
     return this.menuService.findOne(user.id, menuItemId);
   }

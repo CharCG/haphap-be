@@ -10,7 +10,7 @@ export class OrderItemDto {
 
   @IsNotEmpty()
   @IsInt()
-  @Min(1, { message: 'Quantity must be at least 1' })
+  @Min(1)
   @ApiProperty()
   quantity!: number;
 }

@@ -1,46 +1,52 @@
 import { Injectable } from '@nestjs/common';
-import * as MidtransClient from 'midtrans-client';
+import { ConfigService } from '@nestjs/config';
+import { Snap, CoreApi } from 'midtrans-client';
+import { CreateTransactionDto } from './dto/create-transaction.dto';
+import { MidtransWebhookDto } from './dto/midtrans-webhook.dto';
+import * as crypto from 'crypto';
 
 @Injectable()
 export class MidtransService {
-  private snap: MidtransClient.Snap;
-  private core: MidtransClient.CoreApi;
+  private snap: Snap;
+  // private core: CoreApi;
 
-  constructor() {
-    this.snap = new MidtransClient.Snap({
-      isProduction: process.env.MIDTRANS_IS_PRODUCTION === 'true',
-      serverKey: process.env.MIDTRANS_SERVER_KEY || '',
-      clientKey: process.env.MIDTRANS_CLIENT_KEY || '',
+  constructor(private readonly configService: ConfigService) {
+    this.snap = new Snap({
+      isProduction: configService.get<string>('MIDTRANS_IS_PRODUCTION') === 'true',
+      serverKey: configService.get<string>('MIDTRANS_SERVER_KEY') as any,
+      clientKey: configService.get<string>('MIDTRANS_CLIENT_KEY') as any,
     });
 
-    this.core = new MidtransClient.CoreApi({
-      isProduction: process.env.MIDTRANS_IS_PRODUCTION === 'true',
-      serverKey: process.env.MIDTRANS_SERVER_KEY || '',
-      clientKey: process.env.MIDTRANS_CLIENT_KEY || '',
-    });
+    // this.core = new CoreApi({
+    //   isProduction: configService.get<string>('MIDTRANS_IS_PRODUCTION') === 'true',
+    //   serverKey: configService.get<string>('MIDTRANS_SERVER_KEY') as any,
+    //   clientKey: configService.get<string>('MIDTRANS_CLIENT_KEY') as any,
+    // });
   }
 
-  async createTransaction(params: {
-    orderId: string;
-    amount: number;
-    customerName: string;
-    customerEmail: string;
-  }) {
-    const { token, redirect_url } = await this.snap.createTransaction({
+  async createTransaction(dto: CreateTransactionDto) {
+    const transaction = await this.snap.createTransaction({
       transaction_details: {
-        order_id: params.orderId,
-        gross_amount: params.amount,
+        order_id: dto.orderId,
+        gross_amount: dto.grossAmount,
       },
       customer_details: {
-        first_name: params.customerName,
-        email: params.customerEmail,
+        first_name: dto.customerName,
+        email: dto.customerEmail,
+        phone: dto.customerPhone,
       },
     } as any);
 
-    return { token, redirectUrl: redirect_url };
+    return {
+      token: transaction.token,
+      redirectUrl: transaction.redirect_url,
+    };
   }
 
-  async verifyWebhookSignature(notification: any) {
-    return (this.core as any).transaction.notification(notification);
+  async verifyWebhookSignature(dto: MidtransWebhookDto) {
+    const serverKey = this.configService.get<string>('MIDTRANS_SERVER_KEY')!;
+    const payload = `${dto.order_id}${dto.status_code}${dto.gross_amount}${serverKey}`;
+    const hash = crypto.createHash('sha512').update(payload).digest('hex');
+    return hash === dto.signature_key;
   }
 }

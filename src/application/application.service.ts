@@ -84,7 +84,7 @@ export class ApplicationService {
     }
 
     if (application.status !== ApplicationStatus.PENDING) {
-      throw new BadRequestException(`Application already ${application.status}`);
+      throw new BadRequestException(`Application is already ${application.status}`);
     }
 
     let updatedApp;
