@@ -2,20 +2,20 @@ import { IsBoolean, IsInt, IsOptional, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateSurplusDto {
+  @ApiProperty()
   @IsOptional()
   @IsInt()
   @Min(1)
-  @ApiProperty()
   discountPrice?: number;
 
+  @ApiProperty()
   @IsOptional()
   @IsInt()
   @Min(1)
-  @ApiProperty()
   stock?: number;
 
+  @ApiProperty()
   @IsOptional()
   @IsBoolean()
-  @ApiProperty()
   isActive?: boolean;
 }

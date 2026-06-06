@@ -4,14 +4,14 @@ import { MerchantCategory } from '../../generated/prisma/enums';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class GetMerchantsQueryDto {
+  @ApiProperty()
   @IsOptional()
   @IsString()
-  @ApiProperty()
   search?: string;
 
+  @ApiProperty({ enum: MerchantCategory, isArray: true })
   @IsOptional()
   @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
   @IsEnum(MerchantCategory, { each: true })
-  @ApiProperty({ enum: MerchantCategory, isArray: true })
   categories?: MerchantCategory[];
 }

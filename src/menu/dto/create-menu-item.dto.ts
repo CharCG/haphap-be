@@ -2,19 +2,19 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsInt, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
 
 export class CreateMenuItemDto {
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  @ApiProperty()
   name!: string;
 
+  @ApiProperty()
   @IsOptional()
   @IsString()
-  @ApiProperty()
   description?: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsInt()
   @Min(1)
-  @ApiProperty()
   originalPrice!: number;
 }

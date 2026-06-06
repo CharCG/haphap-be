@@ -1,39 +1,39 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class MidtransWebhookDto {
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  @ApiProperty()
   order_id!: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  @ApiProperty()
   transaction_id!: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  @ApiProperty()
   transaction_status!: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  @ApiProperty()
   fraud_status!: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  @ApiProperty()
   status_code!: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  @ApiProperty()
   gross_amount!: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  @ApiProperty()
   signature_key!: string;
 }

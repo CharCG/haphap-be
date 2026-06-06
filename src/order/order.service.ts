@@ -1,9 +1,10 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { CurrentUserDto } from 'src/common/dto/current-user.dto';
-import { Role, Prisma, OrderStatus } from '../generated/prisma/client';
-import { QrCodeUtil } from 'src/common/utils/qrcode.util';
+import { CurrentUserDto } from '../common/dto/current-user.dto';
+import { Role, OrderStatus } from '../generated/prisma/enums';
+import { Prisma } from '../generated/prisma/client';
+import { QrCodeUtil } from '../common/utils/qrcode.util';
 
 @Injectable()
 export class OrderService {
@@ -123,9 +124,17 @@ export class OrderService {
     });
   }
 
-  async findOrderMerchant(merchantId: string) {
+  async findOrderMerchant(userId: string) {
+    const merchant = await this.prismaService.merchant.findUnique({
+      where: { userId },
+    });
+
+    if (!merchant) {
+      throw new NotFoundException('Merchant profile not found');
+    }
+
     return this.prismaService.order.findMany({
-      where: { merchantId },
+      where: { merchantId: merchant.id },
       include: {
         user: true,
         orderItems: true,
@@ -134,7 +143,7 @@ export class OrderService {
     });
   }
 
-  async scanOrder(orderId: string, merchantId: string, qrCode: string) {
+  async scanOrder(orderId: string, userId: string, qrCode: string) {
     const order = await this.prismaService.order.findUnique({
       where: { id: orderId },
       include: { merchant: true, orderItems: true },
@@ -142,9 +151,9 @@ export class OrderService {
 
     if (!order) {
       throw new NotFoundException('Order not found');
-    } else if (order.merchant.userId !== merchantId) {
+    } else if (order.merchant.userId !== userId) {
       throw new ForbiddenException('You are not authorized to scan this order');
-    } else if (order.status !== 'PENDING') {
+    } else if (order.status !== OrderStatus.PENDING) {
       throw new BadRequestException('Order is not in a valid state to be scanned');
     } else if (!this.qrCodeUtil.validateToken(orderId, qrCode)) {
       throw new BadRequestException('Invalid QR code');
@@ -153,7 +162,7 @@ export class OrderService {
     const updatedOrder = await this.prismaService.order.update({
       where: { id: orderId },
       data: {
-        status: 'COMPLETED',
+        status: OrderStatus.COMPLETED,
         paidAt: new Date(),
       },
       include: { orderItems: true },

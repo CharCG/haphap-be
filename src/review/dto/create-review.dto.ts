@@ -2,25 +2,25 @@ import { IsNotEmpty, IsNumber, IsOptional, IsString, IsUUID, Max, Min } from 'cl
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateReviewDto {
+  @ApiProperty()
   @IsNotEmpty()
   @IsUUID()
-  @ApiProperty()
   orderId!: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsUUID()
-  @ApiProperty()
   merchantId!: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsNumber()
   @Min(1)
   @Max(5)
-  @ApiProperty()
   rating!: number;
 
+  @ApiProperty()
   @IsOptional()
   @IsString()
-  @ApiProperty()
   comment?: string;
 }

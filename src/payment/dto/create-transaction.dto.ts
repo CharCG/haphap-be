@@ -1,29 +1,29 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsInt, IsNotEmpty, IsString, IsUUID } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateTransactionDto {
+  @ApiProperty()
   @IsNotEmpty()
   @IsUUID()
-  @ApiProperty()
   orderId!: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsInt()
-  @ApiProperty()
   grossAmount!: number;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  @ApiProperty()
   customerName!: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsEmail()
-  @ApiProperty()
   customerEmail!: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  @ApiProperty()
   customerPhone!: string;
 }

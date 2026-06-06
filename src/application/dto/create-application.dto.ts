@@ -3,48 +3,47 @@ import { MerchantCategory } from '../../generated/prisma/enums';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateApplicationDto {
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  @ApiProperty()
   merchantName!: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  @ApiProperty()
   address!: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsNumber()
-  @ApiProperty()
   latitude!: number;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsNumber()
-  @ApiProperty()
   longitude!: number;
 
   @IsOptional()
   @IsString()
-  @ApiProperty()
   description?: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @Matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
-  @ApiProperty()
   openTime!: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @Matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/)
-  @ApiProperty()
   closeTime!: string;
 
+  @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  @ApiProperty()
   phone!: string;
 
+  @ApiProperty({ enum: MerchantCategory, isArray: true })
   @IsArray()
   @IsEnum(MerchantCategory, { each: true })
-  @ApiProperty({ enum: MerchantCategory, isArray: true })
   categories!: MerchantCategory[];
 }

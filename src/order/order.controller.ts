@@ -1,13 +1,13 @@
-import { Controller, Post, Body, UseGuards, Request, Get, Param, Patch } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Param, Patch } from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../generated/prisma/enums';
-import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { CurrentUserDto } from 'src/common/dto/current-user.dto';
-import { Roles } from 'src/auth/decorators/roles.decorator';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { CurrentUserDto } from '../common/dto/current-user.dto';
 
 @ApiBearerAuth()
 @Controller('orders')

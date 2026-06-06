@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { UpdateApplicationDto } from './dto/update-application.dto';
-import { ApplicationStatus } from '../generated/prisma/enums';
+import { ApplicationStatus, Role } from '../generated/prisma/enums';
 
 @Injectable()
 export class ApplicationService {
@@ -90,35 +90,41 @@ export class ApplicationService {
     let updatedApp;
 
     if (dto.status === ApplicationStatus.APPROVED) {
-      updatedApp = await this.prismaService.application.update({
-        where: { id: applicationId },
-        data: { 
-          status: dto.status, 
-          reviewedAt: new Date(),
-        },
-      });
+      const [updatedApplication, updatedMerchant, updatedUser] = await this.prismaService.$transaction([
+        this.prismaService.application.update({
+          where: { id: applicationId },
+          data: { status: dto.status, reviewedAt: new Date() },
+        }),
 
-      await this.prismaService.merchant.create({
-        data: {
-          userId: application.userId,
-          merchantName: application.merchantName,
-          address: application.address,
-          latitude: application.latitude,
-          longitude: application.longitude,
-          description: application.description,
-          openTime: application.openTime,
-          closeTime: application.closeTime,
-          phone: application.phone,
-          categories: application.categories,
-        },
-      });
+        this.prismaService.merchant.create({
+          data: {
+            userId: application.userId,
+            merchantName: application.merchantName,
+            address: application.address,
+            latitude: application.latitude,
+            longitude: application.longitude,
+            description: application.description,
+            openTime: application.openTime,
+            closeTime: application.closeTime,
+            phone: application.phone,
+            categories: application.categories,
+          },
+        }),
+
+        this.prismaService.user.update({
+          where: { id: application.userId },
+          data: { role: Role.MERCHANT },
+        }),
+      ]);
+
+      updatedApp = updatedApplication;
     } else {
       updatedApp = await this.prismaService.application.update({
         where: { id: applicationId },
-        data: { 
-          status: dto.status, 
-          rejectNote: dto.rejectNote, 
-          reviewedAt: new Date() 
+        data: {
+          status: dto.status,
+          rejectNote: dto.rejectNote,
+          reviewedAt: new Date(),
         },
       });
     }
