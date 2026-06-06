@@ -1,5 +1,4 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { PaymentRepository } from './payment.repository';
 import { MidtransService } from './midtrans.service';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { OrderStatus, PaymentStatus } from '../generated/prisma/client';
@@ -8,7 +7,6 @@ import { MidtransWebhookDto } from './dto/midtrans-webhook.dto';
 @Injectable()
 export class PaymentService {
   constructor(
-    private readonly paymentRepository: PaymentRepository,
     private readonly midtransService: MidtransService,
     private readonly prismaService: PrismaService,
   ) {}
@@ -25,7 +23,9 @@ export class PaymentService {
       throw new BadRequestException('Order is not in PENDING status');
     }
 
-    const existing = await this.paymentRepository.findByOrderId(orderId);
+    const existing = await this.prismaService.payment.findUnique({
+      where: { orderId },
+    });
     if (existing && existing.status === PaymentStatus.PENDING) {
       throw new BadRequestException('Payment already exists for this order');
     }
@@ -37,9 +37,11 @@ export class PaymentService {
       customerEmail: order.user.email,
     });
 
-    const payment = await this.paymentRepository.create({
-      order: { connect: { id: orderId } },
-      amount: order.totalAmount,
+    const payment = await this.prismaService.payment.create({
+      data: {
+        order: { connect: { id: orderId } },
+        amount: order.totalAmount,
+      },
     });
 
     return {
@@ -49,6 +51,7 @@ export class PaymentService {
       status: payment.status,
       snapToken: token,
       redirectUrl,
+      createdAt: payment.createdAt,
     };
   }
 
@@ -57,7 +60,9 @@ export class PaymentService {
       const notification = await this.midtransService.verifyWebhookSignature(dto);
       const { order_id, transaction_id, transaction_status, fraud_status } = notification;
 
-      const payment = await this.paymentRepository.findByOrderId(order_id);
+      const payment = await this.prismaService.payment.findUnique({
+        where: { orderId: order_id },
+      });
       if (!payment) {
         console.warn(`Webhook ignored: Payment not found for order ID ${order_id}`);
         return { received: true };
@@ -84,7 +89,13 @@ export class PaymentService {
         paymentStatus = PaymentStatus.PENDING;
       }
 
-      await this.paymentRepository.updateStatus(payment.id, paymentStatus, transaction_id);
+      await this.prismaService.payment.update({
+        where: { id: payment.id },
+        data: {
+          status: paymentStatus,
+          ...(transaction_id && { transactionId: transaction_id }),
+        },
+      });
 
       if (orderStatus) {
         await this.prismaService.order.update({
@@ -103,4 +114,4 @@ export class PaymentService {
       return { received: true };
     }
   }
-}
+}

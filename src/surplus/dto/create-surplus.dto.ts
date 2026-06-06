@@ -1,14 +1,21 @@
-import { IsInt, IsUUID, Min } from 'class-validator';
+import { IsInt, IsNotEmpty, IsUUID, Min } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateSurplusDto {
+  @IsNotEmpty()
   @IsUUID()
-  menuItemId: string;
+  @ApiProperty()
+  menuItemId!: string;
 
+  @IsNotEmpty()
   @IsInt()
   @Min(1)
-  discountPrice: number;
+  @ApiProperty()
+  discountPrice!: number;
 
+  @IsNotEmpty()
   @IsInt()
   @Min(1)
-  stock: number;
+  @ApiProperty()
+  stock!: number;
 }

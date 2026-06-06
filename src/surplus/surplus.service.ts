@@ -1,73 +1,65 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
-import { SurplusRepository } from './surplus.repository';
-import { MerchantRepository } from '../merchant/merchant.repository';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateSurplusDto } from './dto/create-surplus.dto';
 import { UpdateSurplusDto } from './dto/update-surplus.dto';
 
 @Injectable()
 export class SurplusService {
-  constructor(
-    private readonly surplusRepository: SurplusRepository,
-    private readonly merchantRepository: MerchantRepository,
-    private readonly prismaService: PrismaService,
-  ) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
-  async findAll(userId: string) {
-    const merchant = await this.merchantRepository.findByUserId(userId);
-    if (!merchant) throw new NotFoundException('Merchant profile not found');
+  private async getMerchantIdByUserId(userId: string): Promise<string> {
+    const merchant = await this.prismaService.merchant.findUnique({
+      where: { userId },
+    });
 
-    const items = await this.surplusRepository.findAllByMerchantId(merchant.id);
+    if (!merchant) {
+      throw new NotFoundException('Merchant profile not found for this user');
+    }
 
-    return items.map((i) => ({
-      surplusItemId: i.id,
-      name: i.menuItem.name,
-      description: i.menuItem.description,
-      image: i.menuItem.image,
-      discountPrice: i.discountPrice,
-      originalPrice: i.originalPrice,
-      stock: i.stock,
-      isActive: i.isActive,
-      date: i.date,
-    }));
+    return merchant.id;
   }
 
-  async create(userId: string, dto: CreateSurplusDto) {
-    const merchant = await this.merchantRepository.findByUserId(userId);
-    if (!merchant) throw new NotFoundException('Merchant profile not found');
-
+  private async validateMenuOwner(menuItemId: string, merchantId: string) {
     const menuItem = await this.prismaService.menuItem.findUnique({
-      where: { id: dto.menuItemId },
+      where: { id: menuItemId },
     });
 
-    if (!menuItem) throw new NotFoundException('Menu item not found');
-    if (menuItem.merchantId !== merchant.id) {
-      throw new ForbiddenException('Menu item does not belong to this merchant');
+    if (!menuItem || !menuItem.isActive) {
+      throw new NotFoundException('Menu item not found');
     }
 
-    const existing = await this.prismaService.surplusItem.findFirst({
-      where: {
-        menuItemId: dto.menuItemId,
-        merchantId: merchant.id,
-        date: new Date(new Date().toDateString()),
-        isActive: true,
-      },
-    });
-
-    if (existing) {
-      throw new BadRequestException('Surplus item for this menu already exists today');
+    if (menuItem.merchantId !== merchantId) {
+      throw new ForbiddenException('Access denied');
     }
 
-    const item = await this.surplusRepository.create({
-      discountPrice: dto.discountPrice,
-      originalPrice: menuItem.originalPrice,
-      stock: dto.stock,
-      date: new Date(new Date().toDateString()),
-      menuItem: { connect: { id: dto.menuItemId } },
-      merchant: { connect: { id: merchant.id } },
+    return menuItem;
+  }
+
+  private async validateSurplusOwner(surplusItemId: string, merchantId: string) {
+    const surplusItem = await this.prismaService.surplusItem.findUnique({
+      where: { id: surplusItemId },
     });
 
-    return {
+    if (!surplusItem) {
+      throw new NotFoundException('Surplus item not found');
+    }
+
+    if (surplusItem.merchantId !== merchantId) {
+      throw new ForbiddenException('Access denied');
+    }
+
+    return surplusItem;
+  }
+
+  async findAll(userId: string) {
+    const merchantId = await this.getMerchantIdByUserId(userId);
+
+    const items = await this.prismaService.surplusItem.findMany({
+      where: { merchantId },
+      include: { menuItem: true },
+    });
+
+    return items.map((item) => ({
       surplusItemId: item.id,
       name: item.menuItem.name,
       description: item.menuItem.description,
@@ -77,27 +69,65 @@ export class SurplusService {
       stock: item.stock,
       isActive: item.isActive,
       date: item.date,
+    }));
+  }
+
+  async create(userId: string, dto: CreateSurplusDto) {
+    const merchantId = await this.getMerchantIdByUserId(userId);
+    const menuItem = await this.validateMenuOwner(dto.menuItemId, merchantId);
+
+    const existingSurplusItem = await this.prismaService.surplusItem.findFirst({
+      where: {
+        menuItemId: dto.menuItemId,
+        merchantId: merchantId,
+        date: new Date(new Date().toDateString()),
+        isActive: true,
+      },
+    });
+
+    if (existingSurplusItem) {
+      throw new BadRequestException('Surplus item for this menu already exists today');
+    }
+
+    const surplusItem = await this.prismaService.surplusItem.create({
+      data: {
+        ...dto,
+        originalPrice: menuItem.originalPrice,
+        date: new Date(),
+        merchantId,
+      },
+      include: { menuItem: true },
+    });
+
+    return {
+      surplusItemId: surplusItem.id,
+      name: surplusItem.menuItem.name,
+      description: surplusItem.menuItem.description,
+      image: surplusItem.menuItem.image,
+      discountPrice: surplusItem.discountPrice,
+      originalPrice: surplusItem.originalPrice,
+      stock: surplusItem.stock,
+      isActive: surplusItem.isActive,
+      date: surplusItem.date,
+      createdAt: surplusItem.createdAt,
     };
   }
 
   async update(userId: string, surplusItemId: string, dto: UpdateSurplusDto) {
-    const merchant = await this.merchantRepository.findByUserId(userId);
-    if (!merchant) throw new NotFoundException('Merchant profile not found');
+    const merchantId = await this.getMerchantIdByUserId(userId);
+    const surplusItem = await this.validateSurplusOwner(surplusItemId, merchantId);
 
-    const item = await this.surplusRepository.findById(surplusItemId);
-    if (!item) throw new NotFoundException('Surplus item not found');
-    if (item.merchantId !== merchant.id) {
-      throw new ForbiddenException('Surplus item does not belong to this merchant');
-    }
-
-    const updated = await this.surplusRepository.update(surplusItemId, dto);
+    const updatedSurplusItem = await this.prismaService.surplusItem.update({
+      where: { id: surplusItemId },
+      data: dto,
+    });
 
     return {
-      surplusItemId: updated.id,
-      discountPrice: updated.discountPrice,
-      stock: updated.stock,
-      isActive: updated.isActive,
-      updatedAt: updated.updatedAt,
+      surplusItemId: updatedSurplusItem.id,
+      discountPrice: updatedSurplusItem.discountPrice,
+      stock: updatedSurplusItem.stock,
+      isActive: updatedSurplusItem.isActive,
+      updatedAt: updatedSurplusItem.updatedAt,
     };
   }
 }

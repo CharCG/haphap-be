@@ -7,7 +7,6 @@ import { Role } from '../generated/prisma/enums';
 import { CurrentUser } from '../../src/common/decorators/current-user.decorator';
 import { CurrentUserDto } from '../../src/common/dto/current-user.dto';
 import { CreateReviewDto } from './dto/create-review.dto';
-
 import { ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiBearerAuth()

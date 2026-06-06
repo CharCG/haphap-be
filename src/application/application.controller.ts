@@ -28,15 +28,15 @@ export class ApplicationController {
     return this.applicationService.create(user.id, dto);
   }
 
-  @Patch(':applicationId')
-  @Roles(Role.ADMIN)
-  async updateStatus(@Param('applicationId') applicationId: string, @Body() dto: UpdateApplicationDto) {
-    return this.applicationService.updateStatus(applicationId, dto);
-  }
-
   @Get('me')
   @Roles(Role.CUSTOMER)
   async findMyApplications(@CurrentUser() user: CurrentUserDto) {
     return this.applicationService.findMyApplications(user.id);
+  }
+
+  @Patch(':applicationId')
+  @Roles(Role.ADMIN)
+  async updateStatus(@Param('applicationId') applicationId: string, @Body() dto: UpdateApplicationDto) {
+    return this.applicationService.updateStatus(applicationId, dto);
   }
 }

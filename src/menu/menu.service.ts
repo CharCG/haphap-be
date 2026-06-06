@@ -1,38 +1,47 @@
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { MenuRepository } from './menu.repository';
-import { MerchantRepository } from '../merchant/merchant.repository';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
 
 @Injectable()
 export class MenuService {
-  constructor(
-    private readonly menuRepository: MenuRepository,
-    private readonly merchantRepository: MerchantRepository,
-  ) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
   private async getMerchantIdByUserId(userId: string): Promise<string> {
-    const merchant = await this.merchantRepository.findByUserId(userId);
+    const merchant = await this.prismaService.merchant.findUnique({
+      where: { userId },
+    });
+
     if (!merchant) {
       throw new NotFoundException('Merchant profile not found for this user');
     }
+
     return merchant.id;
   }
 
-  private async validateOwnership(menuItemId: string, merchantId: string) {
-    const menuItem = await this.menuRepository.findById(menuItemId);
+  private async validateMenuOwner(menuItemId: string, merchantId: string) {
+    const menuItem = await this.prismaService.menuItem.findUnique({
+      where: { id: menuItemId },
+    });
+
     if (!menuItem || !menuItem.isActive) {
       throw new NotFoundException('Menu item not found');
     }
+
     if (menuItem.merchantId !== merchantId) {
-      throw new ForbiddenException('You do not have access to this menu item');
+      throw new ForbiddenException('Access denied');
     }
+
     return menuItem;
   }
 
   async findAll(userId: string) {
     const merchantId = await this.getMerchantIdByUserId(userId);
-    const items = await this.menuRepository.findByMerchantId(merchantId);
+
+    const items = await this.prismaService.menuItem.findMany({
+      where: { merchantId },
+      orderBy: { createdAt: 'desc' },
+    });
 
     return items.map((item) => ({
       menuItemId: item.id,
@@ -40,20 +49,40 @@ export class MenuService {
       description: item.description,
       image: item.image,
       originalPrice: item.originalPrice,
-      createdAt: item.createdAt,
-      updatedAt: item.updatedAt,
+      isActive: item.isActive,
     }));
+  }
+
+  async findOne(userId: string, menuItemId: string) {
+    const merchantId = await this.getMerchantIdByUserId(userId);
+    await this.validateMenuOwner(menuItemId, merchantId);
+
+    const menuItem = await this.prismaService.menuItem.findUnique({
+      where: { id: menuItemId },
+    });
+
+    if (!menuItem || !menuItem.isActive) {
+      throw new NotFoundException('Menu item not found');
+    }
+
+    return {
+      menuItemId: menuItem.id,
+      name: menuItem.name,
+      description: menuItem.description,
+      image: menuItem.image,
+      originalPrice: menuItem.originalPrice,
+      isActive: menuItem.isActive,
+    };
   }
 
   async create(userId: string, dto: CreateMenuItemDto) {
     const merchantId = await this.getMerchantIdByUserId(userId);
 
-    const menuItem = await this.menuRepository.create({
-      merchantId,
-      name: dto.name,
-      description: dto.description,
-      image: dto.image,
-      originalPrice: dto.originalPrice,
+    const menuItem = await this.prismaService.menuItem.create({
+      data: {
+        ...dto,
+        merchantId,
+      },
     });
 
     return {
@@ -62,32 +91,44 @@ export class MenuService {
       description: menuItem.description,
       image: menuItem.image,
       originalPrice: menuItem.originalPrice,
+      isActive: menuItem.isActive,
       createdAt: menuItem.createdAt,
     };
   }
 
   async update(userId: string, menuItemId: string, dto: UpdateMenuItemDto) {
     const merchantId = await this.getMerchantIdByUserId(userId);
-    await this.validateOwnership(menuItemId, merchantId);
+    await this.validateMenuOwner(menuItemId, merchantId);
 
-    const updated = await this.menuRepository.update(menuItemId, dto);
+    const updatedMenuItem = await this.prismaService.menuItem.update({
+      where: { id: menuItemId },
+      data: dto,
+    });
 
     return {
-      menuItemId: updated.id,
-      name: updated.name,
-      description: updated.description,
-      image: updated.image,
-      originalPrice: updated.originalPrice,
-      updatedAt: updated.updatedAt,
+      menuItemId: updatedMenuItem.id,
+      name: updatedMenuItem.name,
+      description: updatedMenuItem.description,
+      image: updatedMenuItem.image,
+      originalPrice: updatedMenuItem.originalPrice,
+      isActive: updatedMenuItem.isActive,
+      updatedAt: updatedMenuItem.updatedAt,
     };
   }
 
   async remove(userId: string, menuItemId: string) {
     const merchantId = await this.getMerchantIdByUserId(userId);
-    await this.validateOwnership(menuItemId, merchantId);
+    await this.validateMenuOwner(menuItemId, merchantId);
 
-    await this.menuRepository.softDelete(menuItemId);
+    const deletedMenuItem = await this.prismaService.menuItem.update({
+      where: { id: menuItemId },
+      data: { isActive: false },
+    });
 
-    return { menuItemId };
+    return {
+      menuItemId: deletedMenuItem.id,
+      isActive: deletedMenuItem.isActive,
+      updatedAt: deletedMenuItem.updatedAt,
+    };
   }
 }

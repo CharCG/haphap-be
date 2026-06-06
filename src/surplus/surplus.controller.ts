@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
 import { SurplusService } from './surplus.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -23,10 +23,7 @@ export class SurplusController {
   }
 
   @Post()
-  async create(
-    @CurrentUser() user: CurrentUserDto,
-    @Body() dto: CreateSurplusDto,
-  ) {
+  async create(@CurrentUser() user: CurrentUserDto, @Body() dto: CreateSurplusDto) {
     return this.surplusService.create(user.id, dto);
   }
 
