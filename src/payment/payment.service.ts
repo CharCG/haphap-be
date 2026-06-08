@@ -19,7 +19,6 @@ export class PaymentService {
     } else if (transactionStatus === 'expire') {
       return PaymentStatus.EXPIRED;
     }
-
     return PaymentStatus.PENDING;
   }
 
@@ -29,24 +28,10 @@ export class PaymentService {
       include: { user: true },
     });
 
-    if (!order) {
-      throw new NotFoundException('Order not found');
-    }
-
-    if (order.userId !== userId) {
-      throw new ForbiddenException('Access denied');
-    }
-
+    if (!order) throw new NotFoundException('Order not found');
+    if (order.userId !== userId) throw new ForbiddenException('Access denied');
     if (order.status !== OrderStatus.PENDING) {
       throw new BadRequestException(`Order is already ${order.status}`);
-    }
-
-    const existingPayment = await this.prismaService.payment.findUnique({
-      where: { orderId },
-    });
-
-    if (existingPayment && existingPayment.status === PaymentStatus.PENDING) {
-      throw new BadRequestException('Payment for this order already exists');
     }
 
     const payment = await this.prismaService.payment.upsert({
@@ -59,6 +44,8 @@ export class PaymentService {
       update: {
         status: PaymentStatus.PENDING,
         transactionId: null,
+        snapToken: null,
+        redirectUrl: null,
       },
     });
 
@@ -67,15 +54,12 @@ export class PaymentService {
       grossAmount: order.totalAmount,
       customerName: order.user.name,
       customerEmail: order.user.email,
-      customerPhone: order.user.phone,
+      customerPhone: order.user.phone ?? undefined,
     });
 
     const updatedPayment = await this.prismaService.payment.update({
       where: { id: payment.id },
-      data: {
-        snapToken: token,
-        redirectUrl,
-      },
+      data: { snapToken: token, redirectUrl },
     });
 
     return {
@@ -91,10 +75,7 @@ export class PaymentService {
 
   async handleWebhook(dto: MidtransWebhookDto) {
     const isWebhookValid = await this.midtransService.verifyWebhookSignature(dto);
-
-    if (!isWebhookValid) {
-      throw new BadRequestException('Invalid webhook signature');
-    }
+    if (!isWebhookValid) throw new BadRequestException('Invalid webhook signature');
 
     const { order_id, transaction_id, transaction_status, fraud_status } = dto;
     const paymentStatus = this.resolvePaymentStatus(transaction_status, fraud_status);
@@ -103,19 +84,16 @@ export class PaymentService {
       where: { orderId: order_id },
     });
 
-    if (!payment) {
-      throw new NotFoundException('Payment not found');
-    }
+    if (!payment) throw new NotFoundException('Payment not found');
 
-    let orderStatus;
-
+    let orderStatus: OrderStatus | undefined;
     if (paymentStatus === PaymentStatus.SUCCESS) {
       orderStatus = OrderStatus.PAID;
     } else if (paymentStatus === PaymentStatus.FAILED || paymentStatus === PaymentStatus.EXPIRED) {
       orderStatus = OrderStatus.CANCELLED;
     }
 
-    const updatedPayment = await this.prismaService.payment.update({
+    await this.prismaService.payment.update({
       where: { id: payment.id },
       data: {
         status: paymentStatus,
@@ -124,7 +102,7 @@ export class PaymentService {
     });
 
     if (orderStatus) {
-      const updatedOrder = await this.prismaService.order.update({
+      await this.prismaService.order.update({
         where: { id: order_id },
         data: {
           status: orderStatus,
