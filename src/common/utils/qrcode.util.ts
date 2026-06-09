@@ -4,13 +4,21 @@ import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class QrCodeUtil {
-  constructor(private readonly configService: ConfigService) {}
+  private readonly secret: string;
+  private readonly qrCodeExpiry = 15 * 60 * 1000; // align with order expiry (15 min)
+
+  constructor(private readonly configService: ConfigService) {
+    const secret = this.configService.get<string>('JWT_SECRET');
+    if (!secret) {
+      throw new Error('JWT_SECRET environment variable is not set');
+    }
+    this.secret = secret; // resolved once, used consistently everywhere
+  }
 
   generateToken(orderId: string): string {
     const timestamp = Date.now();
     const data = `${orderId}:${timestamp}`;
-    const secret = this.configService.get<string>('JWT_SECRET') || 'default-secret';
-    const hmac = crypto.createHmac('sha256', secret).update(data).digest('hex');
+    const hmac = crypto.createHmac('sha256', this.secret).update(data).digest('hex');
     return `${data}:${hmac}`;
   }
 
@@ -20,21 +28,21 @@ export class QrCodeUtil {
       if (parts.length !== 3) return false;
 
       const [tokenOrderId, timestamp, providedHmac] = parts;
-      const qrCodeExpiry = 60 * 60 * 1000; // 1 hour
 
-      // Verify order ID matches
       if (tokenOrderId !== orderId) return false;
 
-      // Check if token has expired
       const tokenTime = parseInt(timestamp, 10);
-      if (Date.now() - tokenTime > qrCodeExpiry) return false;
+      if (isNaN(tokenTime)) return false;
+      if (Date.now() - tokenTime > this.qrCodeExpiry) return false;
 
-      // Verify HMAC
       const data = `${tokenOrderId}:${timestamp}`;
-      const secret = this.configService.get<string>('JWT_SECRET') || 'default-secret';
-      const expectedHmac = crypto.createHmac('sha256', secret).update(data).digest('hex');
-
-      return providedHmac === expectedHmac;
+      const expectedHmac = crypto
+        .createHmac('sha256', this.secret) // same secret guaranteed
+        .update(data)
+        .digest('hex');
+``
+      // Timing-safe comparison to prevent timing attacks
+      return crypto.timingSafeEqual(Buffer.from(providedHmac, 'hex'), Buffer.from(expectedHmac, 'hex'));
     } catch {
       return false;
     }

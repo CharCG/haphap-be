@@ -151,11 +151,18 @@ export class OrderService {
 
     if (!order) {
       throw new NotFoundException('Order not found');
-    } else if (order.merchant.userId !== userId) {
+    } 
+    
+    if (order.merchant.userId !== userId) {
       throw new ForbiddenException('You are not authorized to scan this order');
-    } else if (order.status !== OrderStatus.PENDING) {
+    } 
+    
+    if (order.status !== OrderStatus.PAID) {
       throw new BadRequestException('Order is not in a valid state to be scanned');
-    } else if (!this.qrCodeUtil.validateToken(orderId, qrCode)) {
+    } 
+    
+    if (!this.qrCodeUtil.validateToken(orderId, qrCode)) {
+      console.log(orderId + qrCode);
       throw new BadRequestException('Invalid QR code');
     }
 
