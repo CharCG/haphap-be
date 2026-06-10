@@ -7,45 +7,16 @@ export class QrCodeUtil {
   constructor(private readonly configService: ConfigService) {}
 
   generateToken(orderId: string): string {
-    const timestamp = Date.now();
-    const data = `${orderId}:${timestamp}`;
-    const secret = this.configService.get<string>('JWT_SECRET') || 'default-secret';
-    const hmac = crypto.createHmac('sha256', secret).update(data).digest('hex');
-    return `${data}:${hmac}`;
+    return orderId;
   }
 
-  validateToken(orderId: string, token: string): boolean {
-    try {
-      const parts = token.split(':');
-      if (parts.length !== 3) return false;
-
-      const [tokenOrderId, timestamp, providedHmac] = parts;
-      const qrCodeExpiry = 60 * 60 * 1000; // 1 hour
-
-      // Verify order ID matches
-      if (tokenOrderId !== orderId) return false;
-
-      // Check if token has expired
-      const tokenTime = parseInt(timestamp, 10);
-      if (Date.now() - tokenTime > qrCodeExpiry) return false;
-
-      // Verify HMAC
-      const data = `${tokenOrderId}:${timestamp}`;
-      const secret = this.configService.get<string>('JWT_SECRET') || 'default-secret';
-      const expectedHmac = crypto.createHmac('sha256', secret).update(data).digest('hex');
-
-      return providedHmac === expectedHmac;
-    } catch {
-      return false;
-    }
+  validateToken(token: string, orderId: string): boolean {
+    if (!token || !orderId) return false;
+    return token === orderId;
   }
 
   extractOrderId(token: string): string | null {
-    try {
-      const parts = token.split(':');
-      return parts.length === 3 ? parts[0] : null;
-    } catch {
-      return null;
-    }
+    if (!token) return null;
+    return token;
   }
 }

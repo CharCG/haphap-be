@@ -113,4 +113,72 @@ export class PaymentService {
 
     return { received: true };
   }
+
+  async verifyPayment(userId: string, orderId: string) {
+    const order = await this.prismaService.order.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!order) throw new NotFoundException('Order not found');
+    if (order.userId !== userId) throw new ForbiddenException('Access denied');
+
+    // Jika order sudah PAID/COMPLETED, langsung kembalikan status
+    if (order.status !== OrderStatus.PENDING) {
+      return {
+        orderId: order.id,
+        orderStatus: order.status,
+        message: `Order sudah berstatus ${order.status}`,
+      };
+    }
+
+    // Cek status langsung ke Midtrans
+    try {
+      const midtransStatus = await this.midtransService.getTransactionStatus(orderId);
+      const paymentStatus = this.resolvePaymentStatus(
+        midtransStatus.transaction_status,
+        midtransStatus.fraud_status,
+      );
+
+      // Update payment record
+      await this.prismaService.payment.updateMany({
+        where: { orderId },
+        data: {
+          status: paymentStatus,
+          transactionId: midtransStatus.transaction_id || undefined,
+        },
+      });
+
+      // Update order status jika payment sukses
+      let newOrderStatus: OrderStatus = order.status;
+      if (paymentStatus === PaymentStatus.SUCCESS) {
+        newOrderStatus = OrderStatus.PAID;
+        await this.prismaService.order.update({
+          where: { id: orderId },
+          data: { status: OrderStatus.PAID, paidAt: new Date() },
+        });
+      } else if (paymentStatus === PaymentStatus.FAILED || paymentStatus === PaymentStatus.EXPIRED) {
+        newOrderStatus = OrderStatus.CANCELLED;
+        await this.prismaService.order.update({
+          where: { id: orderId },
+          data: { status: OrderStatus.CANCELLED },
+        });
+      }
+
+      return {
+        orderId: order.id,
+        orderStatus: newOrderStatus,
+        paymentStatus,
+        midtransStatus: midtransStatus.transaction_status,
+        message: paymentStatus === PaymentStatus.SUCCESS
+          ? 'Pembayaran berhasil diverifikasi!'
+          : `Status pembayaran: ${midtransStatus.transaction_status}`,
+      };
+    } catch (e) {
+      return {
+        orderId: order.id,
+        orderStatus: order.status,
+        message: 'Belum dapat memverifikasi pembayaran. Coba lagi nanti.',
+      };
+    }
+  }
 }

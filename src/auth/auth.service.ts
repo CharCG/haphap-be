@@ -1,16 +1,24 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { GoogleAuthDto } from './dto/google-auth.dto';
 import bcrypt from 'bcrypt';
+import { OAuth2Client } from 'google-auth-library';
 
 @Injectable()
 export class AuthService {
+  private googleClient: OAuth2Client;
+
   constructor(
     private readonly prismaService: PrismaService,
     private readonly jwtService: JwtService,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    this.googleClient = new OAuth2Client();
+  }
 
   async register(dto: RegisterDto) {
     const existingUser = await this.prismaService.user.findUnique({
@@ -67,4 +75,59 @@ export class AuthService {
       accessToken,
     };
   }
+
+  async googleAuth(dto: GoogleAuthDto) {
+    // Verify the Google ID token
+    let payload;
+    try {
+      const ticket = await this.googleClient.verifyIdToken({
+        idToken: dto.idToken,
+        audience: this.configService.get<string>('GOOGLE_WEB_CLIENT_ID'),
+      });
+      payload = ticket.getPayload();
+    } catch {
+      throw new UnauthorizedException('Invalid Google ID token');
+    }
+
+    if (!payload || !payload.email) {
+      throw new UnauthorizedException('Invalid Google ID token payload');
+    }
+
+    const { email, name, picture, sub: googleId } = payload;
+
+    // Find or create user
+    let user = await this.prismaService.user.findUnique({
+      where: { email },
+    });
+
+    if (!user) {
+      // Create new user with random password (OAuth user won't use password login)
+      const randomPassword = await bcrypt.hash(
+        `google_${googleId}_${Date.now()}`,
+        10,
+      );
+
+      user = await this.prismaService.user.create({
+        data: {
+          name: name ?? 'User',
+          email,
+          password: randomPassword,
+          phone: '',
+          avatar: picture,
+        },
+      });
+    }
+
+    // Generate JWT
+    const jwtPayload = { sub: user.id, role: user.role };
+    const accessToken = await this.jwtService.signAsync(jwtPayload);
+
+    return {
+      userId: user.id,
+      name: user.name,
+      role: user.role,
+      accessToken,
+    };
+  }
 }
+
