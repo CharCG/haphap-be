@@ -154,7 +154,7 @@ export class OrderService {
       throw new ForbiddenException('You are not authorized to scan this order');
     }
 
-    if (order.status !== OrderStatus.PAID) {
+    if (order.status !== OrderStatus.PROCESSING) {
       throw new BadRequestException('Order is not in a valid state to be scanned');
     }
 
