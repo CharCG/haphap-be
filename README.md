@@ -22,7 +22,7 @@
 - [Getting Started](#getting-started)
 - [Tech Stack](#tech-stack)
 - [Endpoints](#endpoints)
-- [Architecture](#architecture)
+- [Software Architecture](#software-architecture)
 - [Appendix](#appendix)
 
 ## Features
@@ -74,6 +74,11 @@ GOOGLE_CLIENT_ID=
 GOOGLE_CLIENT_SECRET=
 GOOGLE_CALLBACK_URL=
 
+SUPABASE_URL=
+SUPABASE_KEY=
+SUPABASE_USER_BUCKET=
+SUPABASE_MENU_BUCKET=M
+
 MIDTRANS_SERVER_KEY=
 MIDTRANS_CLIENT_KEY=
 MIDTRANS_IS_PRODUCTION=
@@ -89,6 +94,20 @@ npm run start:dev
 npm run build
 npm run start:prod
 ```
+
+## Tech Stack
+
+| Layer     | Technology            | Version | Description |
+| --------- | --------------------- | ------- | ----------- |
+| Runtime   | Node.js               | 16.x    | \*          |
+| Framework | NestJS                | 11.x    | \*          |
+| Language  | TypeScript            | 5.x     | \*          |
+| ORM       | Prisma                | 7.x     | \*          |
+| Database  | PostgreSQL (Supabase) | 16.x    | \*          |
+| Storage   | Supabase Storage      | -       | \*          |
+| Payments  | Midtrans              | -       | \*          |
+
+###
 
 ## Endpoints
 
@@ -184,7 +203,7 @@ All endpoints return responses using the following standardized format:
 | `POST` | `/reviews`                       | CUSTOMER | \*          |
 | `GET`  | `/merchants/:merchantId/reviews` | PUBLIC   | \*          |
 
-## Architecture
+## Software Architecture
 
 <img src="https://res.cloudinary.com/dmis04mcg/image/upload/v1780150374/haphap-architecture_d4lia5.png">
 
