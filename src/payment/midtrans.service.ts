@@ -7,25 +7,25 @@ import * as crypto from 'crypto';
 
 @Injectable()
 export class MidtransService {
-  private snap: Snap;
-  private core: CoreApi;
+  private midtransSnapClient: Snap;
+  // private core: CoreApi;
 
   constructor(private readonly configService: ConfigService) {
-    this.snap = new Snap({
+    this.midtransSnapClient = new Snap({
       isProduction: configService.get<string>('MIDTRANS_IS_PRODUCTION') === 'true',
       serverKey: configService.get<string>('MIDTRANS_SERVER_KEY') as any,
       clientKey: configService.get<string>('MIDTRANS_CLIENT_KEY') as any,
     });
 
-    this.core = new CoreApi({
-      isProduction: configService.get<string>('MIDTRANS_IS_PRODUCTION') === 'true',
-      serverKey: configService.get<string>('MIDTRANS_SERVER_KEY') as any,
-      clientKey: configService.get<string>('MIDTRANS_CLIENT_KEY') as any,
-    });
+    // this.core = new CoreApi({
+    //   isProduction: configService.get<string>('MIDTRANS_IS_PRODUCTION') === 'true',
+    //   serverKey: configService.get<string>('MIDTRANS_SERVER_KEY') as any,
+    //   clientKey: configService.get<string>('MIDTRANS_CLIENT_KEY') as any,
+    // });
   }
 
   async createTransaction(dto: CreateTransactionDto) {
-    const transaction = await this.snap.createTransaction({
+    const transaction = await this.midtransSnapClient.createTransaction({
       transaction_details: {
         order_id: dto.orderId,
         gross_amount: dto.grossAmount,
@@ -48,16 +48,5 @@ export class MidtransService {
     const payload = `${dto.order_id}${dto.status_code}${dto.gross_amount}${serverKey}`;
     const hash = crypto.createHash('sha512').update(payload).digest('hex');
     return hash === dto.signature_key;
-  }
-
-  async getTransactionStatus(orderId: string) {
-    const status = await (this.core as any).transaction.status(orderId);
-    return {
-      transaction_status: status.transaction_status,
-      fraud_status: status.fraud_status ?? '',
-      transaction_id: status.transaction_id ?? '',
-      status_code: status.status_code ?? '',
-      gross_amount: status.gross_amount ?? '',
-    };
   }
 }

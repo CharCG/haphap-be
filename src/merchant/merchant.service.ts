@@ -31,7 +31,12 @@ export class MerchantService {
   async findOne(merchantId: string) {
     const merchant = await this.prismaService.merchant.findUnique({
       where: { id: merchantId },
-      include: { surplusItems: { where: { isActive: true }, include: { menuItem: true } } },
+      include: {
+        surplusItems: {
+          where: { isActive: true },
+          include: { menuItem: true },
+        },
+      },
     });
 
     if (!merchant) {

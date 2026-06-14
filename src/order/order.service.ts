@@ -8,10 +8,7 @@ import { QrCodeUtil } from '../common/utils/qrcode.util';
 
 @Injectable()
 export class OrderService {
-  constructor(
-    private readonly prismaService: PrismaService,
-    private readonly qrCodeUtil: QrCodeUtil,
-  ) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
   async create(userId: string, dto: CreateOrderDto) {
     const order = await this.prismaService.$transaction(async (prisma) => {
@@ -68,7 +65,7 @@ export class OrderService {
         include: { orderItems: true },
       });
 
-      const qrCode = await this.qrCodeUtil.generateToken(createdOrder.id);
+      const qrCode = await QrCodeUtil.generateToken(createdOrder.id);
 
       const updatedOrder = await prisma.order.update({
         where: { id: createdOrder.id },
@@ -161,8 +158,7 @@ export class OrderService {
       throw new BadRequestException('Order is not in a valid state to be scanned');
     }
 
-    if (!this.qrCodeUtil.validateToken(qrCode, orderId)) {
-      console.log('ini' + orderId + 'ini adalah' + qrCode);
+    if (!QrCodeUtil.validateToken(qrCode, orderId)) {
       throw new BadRequestException('Invalid QR code');
     }
 

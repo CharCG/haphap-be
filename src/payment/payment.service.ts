@@ -9,17 +9,24 @@ export class PaymentService {
   constructor(
     private readonly midtransService: MidtransService,
     private readonly prismaService: PrismaService,
-  ) { }
+  ) {}
 
-  private resolvePaymentStatus(transactionStatus: string, fraudStatus: string): PaymentStatus {
-    if (transactionStatus === 'capture' || transactionStatus === 'settlement') {
-      return fraudStatus === 'accept' || !fraudStatus ? PaymentStatus.SUCCESS : PaymentStatus.FAILED;
-    } else if (['cancel', 'deny', 'failure'].includes(transactionStatus)) {
-      return PaymentStatus.FAILED;
-    } else if (transactionStatus === 'expire') {
-      return PaymentStatus.EXPIRED;
+  private resolveStatus(transactionStatus: string, fraudStatus: string) {
+    switch (transactionStatus) {
+      case 'capture':
+      case 'settlement':
+        return fraudStatus === 'accept' || !fraudStatus
+          ? { paymentStatus: PaymentStatus.SUCCESS, orderStatus: OrderStatus.PROCESSING }
+          : { paymentStatus: PaymentStatus.FAILED, orderStatus: OrderStatus.CANCELLED };
+      case 'cancel':
+      case 'deny':
+      case 'failure':
+        return { paymentStatus: PaymentStatus.FAILED, orderStatus: OrderStatus.CANCELLED };
+      case 'expire':
+        return { paymentStatus: PaymentStatus.EXPIRED, orderStatus: OrderStatus.CANCELLED };
+      default:
+        return { paymentStatus: PaymentStatus.PENDING, orderStatus: OrderStatus.PENDING };
     }
-    return PaymentStatus.PENDING;
   }
 
   async createPayment(userId: string, orderId: string) {
@@ -28,8 +35,14 @@ export class PaymentService {
       include: { user: true },
     });
 
-    if (!order) throw new NotFoundException('Order not found');
-    if (order.userId !== userId) throw new ForbiddenException('Access denied');
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    if (order.userId !== userId) {
+      throw new ForbiddenException('Access denied');
+    }
+
     if (order.status !== OrderStatus.PENDING) {
       throw new BadRequestException(`Order is already ${order.status}`);
     }
@@ -54,7 +67,7 @@ export class PaymentService {
       grossAmount: order.totalAmount,
       customerName: order.user.name,
       customerEmail: order.user.email,
-      customerPhone: order.user.phone ?? undefined,
+      customerPhone: order.user.phone,
     });
 
     const updatedPayment = await this.prismaService.payment.update({
@@ -75,41 +88,36 @@ export class PaymentService {
 
   async handleWebhook(dto: MidtransWebhookDto) {
     const isWebhookValid = await this.midtransService.verifyWebhookSignature(dto);
-    if (!isWebhookValid) throw new BadRequestException('Invalid webhook signature');
+
+    if (!isWebhookValid) {
+      throw new BadRequestException('Invalid webhook');
+    }
 
     const { order_id, transaction_id, transaction_status, fraud_status } = dto;
-    const paymentStatus = this.resolvePaymentStatus(transaction_status, fraud_status);
+    const { paymentStatus, orderStatus } = this.resolveStatus(transaction_status, fraud_status);
 
     const payment = await this.prismaService.payment.findUnique({
       where: { orderId: order_id },
     });
 
-    if (!payment) throw new NotFoundException('Payment not found');
-
-    let orderStatus: OrderStatus | undefined;
-    if (paymentStatus === PaymentStatus.SUCCESS) {
-      orderStatus = OrderStatus.PAID;
-    } else if (paymentStatus === PaymentStatus.FAILED || paymentStatus === PaymentStatus.EXPIRED) {
-      orderStatus = OrderStatus.CANCELLED;
+    if (!payment) {
+      throw new NotFoundException('Payment not found');
     }
 
-    await this.prismaService.payment.update({
-      where: { id: payment.id },
-      data: {
-        status: paymentStatus,
-        ...(transaction_id && { transactionId: transaction_id }),
-      },
-    });
+    await this.prismaService.$transaction([
+      this.prismaService.payment.update({
+        where: { id: payment.id },
+        data: { status: paymentStatus, transactionId: transaction_id },
+      }),
 
-    if (orderStatus) {
-      await this.prismaService.order.update({
+      this.prismaService.order.update({
         where: { id: order_id },
         data: {
           status: orderStatus,
-          ...(orderStatus === OrderStatus.PAID && { paidAt: new Date() }),
+          ...(orderStatus === OrderStatus.PROCESSING && { paidAt: new Date() }),
         },
-      });
-    }
+      }),
+    ]);
 
     return { received: true };
   }
@@ -119,66 +127,19 @@ export class PaymentService {
       where: { id: orderId },
     });
 
-    if (!order) throw new NotFoundException('Order not found');
-    if (order.userId !== userId) throw new ForbiddenException('Access denied');
-
-    // Jika order sudah PAID/COMPLETED, langsung kembalikan status
-    if (order.status !== OrderStatus.PENDING) {
-      return {
-        orderId: order.id,
-        orderStatus: order.status,
-        message: `Order sudah berstatus ${order.status}`,
-      };
+    if (!order) {
+      throw new NotFoundException('Order not found');
     }
 
-    // Cek status langsung ke Midtrans
-    try {
-      const midtransStatus = await this.midtransService.getTransactionStatus(orderId);
-      const paymentStatus = this.resolvePaymentStatus(
-        midtransStatus.transaction_status,
-        midtransStatus.fraud_status,
-      );
-
-      // Update payment record
-      await this.prismaService.payment.updateMany({
-        where: { orderId },
-        data: {
-          status: paymentStatus,
-          transactionId: midtransStatus.transaction_id || undefined,
-        },
-      });
-
-      // Update order status jika payment sukses
-      let newOrderStatus: OrderStatus = order.status;
-      if (paymentStatus === PaymentStatus.SUCCESS) {
-        newOrderStatus = OrderStatus.PAID;
-        await this.prismaService.order.update({
-          where: { id: orderId },
-          data: { status: OrderStatus.PAID, paidAt: new Date() },
-        });
-      } else if (paymentStatus === PaymentStatus.FAILED || paymentStatus === PaymentStatus.EXPIRED) {
-        newOrderStatus = OrderStatus.CANCELLED;
-        await this.prismaService.order.update({
-          where: { id: orderId },
-          data: { status: OrderStatus.CANCELLED },
-        });
-      }
-
-      return {
-        orderId: order.id,
-        orderStatus: newOrderStatus,
-        paymentStatus,
-        midtransStatus: midtransStatus.transaction_status,
-        message: paymentStatus === PaymentStatus.SUCCESS
-          ? 'Pembayaran berhasil diverifikasi!'
-          : `Status pembayaran: ${midtransStatus.transaction_status}`,
-      };
-    } catch (e) {
-      return {
-        orderId: order.id,
-        orderStatus: order.status,
-        message: 'Belum dapat memverifikasi pembayaran. Coba lagi nanti.',
-      };
+    if (order.userId !== userId) {
+      throw new ForbiddenException('Access denied');
     }
+
+    return {
+      orderId: order.id,
+      status: order.status,
+      totalAmount: order.totalAmount,
+      paidAt: order.paidAt,
+    };
   }
 }

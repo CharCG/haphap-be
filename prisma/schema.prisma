@@ -31,7 +31,7 @@ enum MerchantCategory {
 
 enum OrderStatus {
   PENDING
-  PAID
+  PROCESSING
   COMPLETED
   CANCELLED
 }

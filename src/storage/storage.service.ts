@@ -2,14 +2,14 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { v4 } from 'uuid';
-import * as path from 'path';
+import path from 'path';
 
 @Injectable()
 export class StorageService {
-  private supabase: SupabaseClient;
+  private supabaseClient: SupabaseClient;
 
   constructor(private readonly configService: ConfigService) {
-    this.supabase = createClient(
+    this.supabaseClient = createClient(
       this.configService.get<string>('SUPABASE_URL')!,
       this.configService.get<string>('SUPABASE_KEY')!,
     );
@@ -20,7 +20,7 @@ export class StorageService {
     const fileName = `${v4()}${fileExtension}`;
     const filePath = folderName ? `${folderName}/${fileName}` : fileName;
 
-    const { data, error } = await this.supabase.storage.from(bucketName).upload(filePath, file.buffer, {
+    const { data, error } = await this.supabaseClient.storage.from(bucketName).upload(filePath, file.buffer, {
       contentType: file.mimetype,
       upsert: false,
     });
@@ -29,7 +29,7 @@ export class StorageService {
       throw new InternalServerErrorException('Internal server error');
     }
 
-    const { data: publicUrlData } = this.supabase.storage.from(bucketName).getPublicUrl(filePath);
+    const { data: publicUrlData } = this.supabaseClient.storage.from(bucketName).getPublicUrl(filePath);
 
     return publicUrlData.publicUrl;
   }
