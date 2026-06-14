@@ -1,30 +1,77 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { MerchantRepository } from './merchant.repository';
+import { PrismaService } from '../../src/prisma/prisma.service';
 import { GetMerchantsQueryDto } from './dto/get-merchants-query.dto';
 import { UpdateMerchantDto } from './dto/update-merchant.dto';
 
 @Injectable()
 export class MerchantService {
-  constructor(private readonly merchantRepository: MerchantRepository) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
   async findAll(dto: GetMerchantsQueryDto) {
-    const merchants = await this.merchantRepository.findAll(dto.search, dto.categories);
+    const merchants = await this.prismaService.merchant.findMany({
+      where: {
+        merchantName: dto.search ? { contains: dto.search, mode: 'insensitive' } : undefined,
+        categories: dto.categories && dto.categories.length > 0 ? { hasSome: dto.categories } : undefined,
+      },
+    });
 
-    return merchants.map((m) => ({
-      merchantId: m.id,
-      merchantName: m.merchantName,
-      address: m.address,
-      description: m.description,
-      openTime: m.openTime,
-      closeTime: m.closeTime,
-      avatar: m.avatar,
-      categories: m.categories,
-      rating: m.rating,
+    return merchants.map((merchant) => ({
+      merchantId: merchant.id,
+      merchantName: merchant.merchantName,
+      address: merchant.address,
+      description: merchant.description,
+      openTime: merchant.openTime,
+      closeTime: merchant.closeTime,
+      avatar: merchant.avatar,
+      categories: merchant.categories,
+      rating: merchant.rating,
     }));
   }
 
+  async findOne(merchantId: string) {
+    const merchant = await this.prismaService.merchant.findUnique({
+      where: { id: merchantId },
+      include: {
+        surplusItems: {
+          where: { isActive: true },
+          include: { menuItem: true },
+        },
+      },
+    });
+
+    if (!merchant) {
+      throw new NotFoundException('Merchant not found');
+    }
+
+    return {
+      merchantId: merchant.id,
+      merchantName: merchant.merchantName,
+      address: merchant.address,
+      latitude: merchant.latitude,
+      longitude: merchant.longitude,
+      description: merchant.description,
+      openTime: merchant.openTime,
+      closeTime: merchant.closeTime,
+      phone: merchant.phone,
+      avatar: merchant.avatar,
+      categories: merchant.categories,
+      rating: merchant.rating,
+      surplusItems: merchant.surplusItems.map((surplusItem) => ({
+        surplusItemId: surplusItem.id,
+        name: surplusItem.menuItem.name,
+        description: surplusItem.menuItem.description,
+        image: surplusItem.menuItem.image,
+        discountPrice: surplusItem.discountPrice,
+        originalPrice: surplusItem.originalPrice,
+        stock: surplusItem.stock,
+      })),
+    };
+  }
+
   async getMe(userId: string) {
-    const merchant = await this.merchantRepository.findByUserId(userId);
+    const merchant = await this.prismaService.merchant.findUnique({
+      where: { userId },
+    });
 
     if (!merchant) {
       throw new NotFoundException('Merchant profile not found for this user');
@@ -49,67 +96,50 @@ export class MerchantService {
   }
 
   async updateMe(userId: string, dto: UpdateMerchantDto) {
-    const merchant = await this.merchantRepository.findByUserId(userId);
+    const merchant = await this.prismaService.merchant.findUnique({
+      where: { userId },
+    });
 
     if (!merchant) {
       throw new NotFoundException('Merchant profile not found for this user');
     }
 
-    const updated = await this.merchantRepository.update(merchant.id, dto);
+    const updatedMerchant = await this.prismaService.merchant.update({
+      where: { userId },
+      data: dto,
+    });
 
     return {
-      merchantId: updated.id,
-      description: updated.description,
-      openTime: updated.openTime,
-      closeTime: updated.closeTime,
-      avatar: updated.avatar,
-      categories: updated.categories,
-      updatedAt: updated.updatedAt,
-    };
-  }
-
-  async findOne(merchantId: string) {
-    const merchant = await this.merchantRepository.findByIdWithSurplus(merchantId);
-
-    if (!merchant) {
-      throw new NotFoundException('Merchant not found');
-    }
-
-    return {
-      merchantId: merchant.id,
-      merchantName: merchant.merchantName,
-      address: merchant.address,
-      latitude: merchant.latitude,
-      longitude: merchant.longitude,
-      description: merchant.description,
-      openTime: merchant.openTime,
-      closeTime: merchant.closeTime,
-      phone: merchant.phone,
-      avatar: merchant.avatar,
-      categories: merchant.categories,
-      rating: merchant.rating,
-      surplusItems: merchant.surplusItems.map((i) => ({
-        surplusItemId: i.id,
-        name: i.menuItem.name,
-        description: i.menuItem.description,
-        image: i.menuItem.image,
-        discountPrice: i.discountPrice,
-        originalPrice: i.originalPrice,
-        stock: i.stock,
-      })),
+      merchantId: updatedMerchant.id,
+      description: updatedMerchant.description,
+      openTime: updatedMerchant.openTime,
+      closeTime: updatedMerchant.closeTime,
+      avatar: updatedMerchant.avatar,
+      categories: updatedMerchant.categories,
+      updatedAt: updatedMerchant.updatedAt,
     };
   }
 
   async findReviews(merchantId: string) {
-    const reviews = await this.merchantRepository.findReviewsByMerchantId(merchantId);
+    const reviews = await this.prismaService.review.findMany({
+      where: { merchantId },
+      include: {
+        user: {
+          select: {
+            name: true,
+            avatar: true,
+          },
+        },
+      },
+    });
 
-    return reviews.map((r) => ({
-      reviewId: r.id,
-      rating: r.rating,
-      comment: r.comment,
-      createdAt: r.createdAt,
-      customerName: r.user.name,
-      customerAvatar: r.user.avatar,
+    return reviews.map((review) => ({
+      reviewId: review.id,
+      rating: review.rating,
+      comment: review.comment,
+      createdAt: review.createdAt,
+      customerName: review.user.name,
+      customerAvatar: review.user.avatar,
     }));
   }
 }

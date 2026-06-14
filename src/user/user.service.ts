@@ -1,15 +1,23 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
-import { UserRepository } from './user.repository';
+import { ConfigService } from '@nestjs/config';
+import { PrismaService } from '../../src/prisma/prisma.service';
+import { StorageService } from '../common/storage/storage.service';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import * as bcrypt from 'bcrypt';
+import bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly storageService: StorageService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async getMe(userId: string) {
-    const user = await this.userRepository.findById(userId);
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+    });
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -28,25 +36,32 @@ export class UserService {
 
   async updateMe(userId: string, dto: UpdateUserDto) {
     if (dto.email) {
-      const existingUser = await this.userRepository.findByEmail(dto.email);
+      const existingUser = await this.prismaService.user.findUnique({
+        where: { email: dto.email },
+      });
+
       if (existingUser && existingUser.id !== userId) {
         throw new BadRequestException('Email already exists');
       }
     }
 
-    const updatedUser = await this.userRepository.update(userId, dto);
+    const updatedUser = await this.prismaService.user.update({
+      where: { id: userId },
+      data: dto,
+    });
 
     return {
       userId: updatedUser.id,
       name: updatedUser.name,
       email: updatedUser.email,
-      avatar: updatedUser.avatar,
       updatedAt: updatedUser.updatedAt,
     };
   }
 
-  async updatePassword(userId: string, dto: UpdatePasswordDto) {
-    const user = await this.userRepository.findById(userId);
+  async updateMyPassword(userId: string, dto: UpdatePasswordDto) {
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+    });
 
     if (!user) {
       throw new NotFoundException('User not found');
@@ -59,10 +74,34 @@ export class UserService {
     }
 
     const hashedPassword = await bcrypt.hash(dto.newPassword, 10);
-    const updatedUser = await this.userRepository.update(userId, { password: hashedPassword });
+
+    const updatedUser = await this.prismaService.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
 
     return {
       userId: updatedUser.id,
+      updatedAt: updatedUser.updatedAt,
+    };
+  }
+
+  async uploadAvatar(userId: string, file: Express.Multer.File) {
+    if (!file) {
+      throw new BadRequestException('File is required');
+    }
+
+    const bucketName = this.configService.get<string>('SUPABASE_USER_BUCKET')!;
+    const avatarUrl = await this.storageService.uploadFile(file, bucketName, userId);
+
+    const updatedUser = await this.prismaService.user.update({
+      where: { id: userId },
+      data: { avatar: avatarUrl },
+    });
+
+    return {
+      userId: updatedUser.id,
+      avatar: updatedUser.avatar,
       updatedAt: updatedUser.updatedAt,
     };
   }

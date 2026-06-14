@@ -1,106 +1,145 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { PaymentRepository } from './payment.repository';
-import { MidtransService } from './midtrans.service';
+import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../../src/prisma/prisma.service';
-import { OrderStatus, PaymentStatus } from '../generated/prisma/client';
+import { MidtransService } from './midtrans.service';
+import { OrderStatus, PaymentStatus } from '../generated/prisma/enums';
 import { MidtransWebhookDto } from './dto/midtrans-webhook.dto';
 
 @Injectable()
 export class PaymentService {
   constructor(
-    private readonly paymentRepository: PaymentRepository,
     private readonly midtransService: MidtransService,
     private readonly prismaService: PrismaService,
   ) {}
 
-  async createPayment(orderId: string, userId: string) {
+  private resolveStatus(transactionStatus: string, fraudStatus: string) {
+    switch (transactionStatus) {
+      case 'capture':
+      case 'settlement':
+        return fraudStatus === 'accept' || !fraudStatus
+          ? { paymentStatus: PaymentStatus.SUCCESS, orderStatus: OrderStatus.PROCESSING }
+          : { paymentStatus: PaymentStatus.FAILED, orderStatus: OrderStatus.CANCELLED };
+      case 'cancel':
+      case 'deny':
+      case 'failure':
+        return { paymentStatus: PaymentStatus.FAILED, orderStatus: OrderStatus.CANCELLED };
+      case 'expire':
+        return { paymentStatus: PaymentStatus.EXPIRED, orderStatus: OrderStatus.CANCELLED };
+      default:
+        return { paymentStatus: PaymentStatus.PENDING, orderStatus: OrderStatus.PENDING };
+    }
+  }
+
+  async createPayment(userId: string, orderId: string) {
     const order = await this.prismaService.order.findUnique({
       where: { id: orderId },
       include: { user: true },
     });
 
-    if (!order) throw new NotFoundException('Order not found');
-    if (order.userId !== userId) throw new BadRequestException('Unauthorized');
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    if (order.userId !== userId) {
+      throw new ForbiddenException('Access denied');
+    }
+
     if (order.status !== OrderStatus.PENDING) {
-      throw new BadRequestException('Order is not in PENDING status');
+      throw new BadRequestException(`Order is already ${order.status}`);
     }
 
-    const existing = await this.paymentRepository.findByOrderId(orderId);
-    if (existing && existing.status === PaymentStatus.PENDING) {
-      throw new BadRequestException('Payment already exists for this order');
-    }
-
-    const { token, redirectUrl } = await this.midtransService.createTransaction({
-      orderId: order.id,
-      amount: order.totalAmount,
-      customerName: order.user.name,
-      customerEmail: order.user.email,
+    const payment = await this.prismaService.payment.upsert({
+      where: { orderId },
+      create: {
+        order: { connect: { id: orderId } },
+        status: PaymentStatus.PENDING,
+        amount: order.totalAmount,
+      },
+      update: {
+        status: PaymentStatus.PENDING,
+        transactionId: null,
+        snapToken: null,
+        redirectUrl: null,
+      },
     });
 
-    const payment = await this.paymentRepository.create({
-      order: { connect: { id: orderId } },
-      amount: order.totalAmount,
+    const { token, redirectUrl } = await this.midtransService.createTransaction({
+      orderId,
+      grossAmount: order.totalAmount,
+      customerName: order.user.name,
+      customerEmail: order.user.email,
+      customerPhone: order.user.phone,
+    });
+
+    const updatedPayment = await this.prismaService.payment.update({
+      where: { id: payment.id },
+      data: { snapToken: token, redirectUrl },
     });
 
     return {
-      paymentId: payment.id,
-      orderId: payment.orderId,
-      amount: payment.amount,
-      status: payment.status,
-      snapToken: token,
-      redirectUrl,
+      paymentId: updatedPayment.id,
+      orderId: updatedPayment.orderId,
+      status: updatedPayment.status,
+      amount: updatedPayment.amount,
+      snapToken: updatedPayment.snapToken,
+      redirectUrl: updatedPayment.redirectUrl,
+      createdAt: updatedPayment.createdAt,
     };
   }
 
   async handleWebhook(dto: MidtransWebhookDto) {
-    try {
-      const notification = await this.midtransService.verifyWebhookSignature(dto);
-      const { order_id, transaction_id, transaction_status, fraud_status } = notification;
+    const isWebhookValid = await this.midtransService.verifyWebhookSignature(dto);
 
-      const payment = await this.paymentRepository.findByOrderId(order_id);
-      if (!payment) {
-        console.warn(`Webhook ignored: Payment not found for order ID ${order_id}`);
-        return { received: true };
-      }
-
-      let paymentStatus: PaymentStatus;
-      let orderStatus: OrderStatus | null = null;
-
-      if (transaction_status === 'capture' || transaction_status === 'settlement') {
-        if (fraud_status === 'accept' || !fraud_status) {
-          paymentStatus = PaymentStatus.SUCCESS;
-          orderStatus = OrderStatus.PAID;
-        } else {
-          paymentStatus = PaymentStatus.FAILED;
-          orderStatus = OrderStatus.CANCELLED;
-        }
-      } else if (['cancel', 'deny', 'failure'].includes(transaction_status)) {
-        paymentStatus = PaymentStatus.FAILED;
-        orderStatus = OrderStatus.CANCELLED;
-      } else if (transaction_status === 'expire') {
-        paymentStatus = PaymentStatus.EXPIRED;
-        orderStatus = OrderStatus.CANCELLED;
-      } else {
-        paymentStatus = PaymentStatus.PENDING;
-      }
-
-      await this.paymentRepository.updateStatus(payment.id, paymentStatus, transaction_id);
-
-      if (orderStatus) {
-        await this.prismaService.order.update({
-          where: { id: order_id },
-          data: {
-            status: orderStatus,
-            ...(orderStatus === OrderStatus.PAID && { paidAt: new Date() }),
-          },
-        });
-      }
-
-      return { received: true };
-    } catch (error) {
-      console.error('Error handling Midtrans webhook:', error);
-      // Return success response to satisfy Midtrans test pings and stop retries
-      return { received: true };
+    if (!isWebhookValid) {
+      throw new BadRequestException('Invalid webhook');
     }
+
+    const { order_id, transaction_id, transaction_status, fraud_status } = dto;
+    const { paymentStatus, orderStatus } = this.resolveStatus(transaction_status, fraud_status);
+
+    const payment = await this.prismaService.payment.findUnique({
+      where: { orderId: order_id },
+    });
+
+    if (!payment) {
+      throw new NotFoundException('Payment not found');
+    }
+
+    await this.prismaService.$transaction([
+      this.prismaService.payment.update({
+        where: { id: payment.id },
+        data: { status: paymentStatus, transactionId: transaction_id },
+      }),
+
+      this.prismaService.order.update({
+        where: { id: order_id },
+        data: {
+          status: orderStatus,
+          ...(orderStatus === OrderStatus.PROCESSING && { paidAt: new Date() }),
+        },
+      }),
+    ]);
+
+    return { received: true };
+  }
+
+  async verifyPayment(userId: string, orderId: string) {
+    const order = await this.prismaService.order.findUnique({
+      where: { id: orderId },
+    });
+
+    if (!order) {
+      throw new NotFoundException('Order not found');
+    }
+
+    if (order.userId !== userId) {
+      throw new ForbiddenException('Access denied');
+    }
+
+    return {
+      orderId: order.id,
+      status: order.status,
+      totalAmount: order.totalAmount,
+      paidAt: order.paidAt,
+    };
   }
 }

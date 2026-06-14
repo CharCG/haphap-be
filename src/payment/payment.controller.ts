@@ -12,9 +12,9 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 @ApiBearerAuth()
 @Controller('payments')
 export class PaymentController {
-  constructor(private readonly paymentService: PaymentService) {}
+  constructor(private readonly paymentService: PaymentService) { }
 
-  @Post('webhook/midtrans')
+  @Post('webhook')
   async handleWebhook(@Body() dto: MidtransWebhookDto) {
     return this.paymentService.handleWebhook(dto);
   }
@@ -22,10 +22,14 @@ export class PaymentController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.CUSTOMER)
   @Post(':orderId')
-  async createPayment(
-    @Param('orderId') orderId: string,
-    @CurrentUser() user: CurrentUserDto,
-  ) {
-    return this.paymentService.createPayment(orderId, user.id);
+  async createPayment(@CurrentUser() user: CurrentUserDto, @Param('orderId') orderId: string) {
+    return this.paymentService.createPayment(user.id, orderId);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.CUSTOMER)
+  @Post(':orderId/verify')
+  async verifyPayment(@CurrentUser() user: CurrentUserDto, @Param('orderId') orderId: string) {
+    return this.paymentService.verifyPayment(user.id, orderId);
   }
 }

@@ -1,13 +1,14 @@
-import { Controller, Post, Body, UseGuards, Request, Get, Param, Patch } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get, Param, Patch } from '@nestjs/common';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
+import { ScanOrderDto } from './dto/scan-order.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../generated/prisma/enums';
-import { CurrentUser } from 'src/common/decorators/current-user.decorator';
-import { CurrentUserDto } from 'src/common/dto/current-user.dto';
-import { Roles } from 'src/auth/decorators/roles.decorator';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { CurrentUserDto } from '../common/dto/current-user.dto';
 
 @ApiBearerAuth()
 @Controller('orders')
@@ -27,21 +28,21 @@ export class OrderController {
     return await this.orderService.findOrderMe(user.id);
   }
 
+  @Get('merchant')
+  @Roles(Role.MERCHANT)
+  async findOrderMerchant(@CurrentUser() user: CurrentUserDto) {
+    return await this.orderService.findOrderMerchant(user.id);
+  }
+
   @Get(':orderId')
   @Roles(Role.CUSTOMER, Role.MERCHANT)
   async findOrderById(@Param('orderId') orderId: string, @CurrentUser() user: CurrentUserDto) {
     return await this.orderService.findOrderById(orderId, user);
   }
   
-  @Get('merchant')
-  @Roles(Role.MERCHANT)
-  async findOrderMerchant(@CurrentUser() user: CurrentUserDto) {
-    return await this.orderService.findOrderMerchant(user.id);
-  }
-  
   @Patch(':orderId/scan')
   @Roles(Role.MERCHANT)
-  async scanOrder(@Param('orderId') orderId: string, @CurrentUser() currentUser: CurrentUserDto, @Body() dto: { qrCode: string }) {
+  async scanOrder(@Param('orderId') orderId: string, @CurrentUser() currentUser: CurrentUserDto, @Body() dto: ScanOrderDto) {
     return await this.orderService.scanOrder(orderId, currentUser.id, dto.qrCode);
   }
 } 

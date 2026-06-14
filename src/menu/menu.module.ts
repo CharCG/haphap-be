@@ -1,13 +1,12 @@
 import { Module } from '@nestjs/common';
 import { MenuController } from './menu.controller';
 import { MenuService } from './menu.service';
-import { MenuRepository } from './menu.repository';
-import { MerchantModule } from '../merchant/merchant.module';
+import { StorageModule } from '../common/storage/storage.module';
 
 @Module({
-  imports: [MerchantModule],
+  imports: [StorageModule],
   controllers: [MenuController],
-  providers: [MenuService, MenuRepository],
-  exports: [MenuService, MenuRepository],
+  providers: [MenuService],
+  exports: [MenuService],
 })
 export class MenuModule {}

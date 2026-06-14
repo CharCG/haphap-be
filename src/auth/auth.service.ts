@@ -1,20 +1,33 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { AuthRepository } from './auth.repository';
-import { OAuth2Client } from 'google-auth-library';
+import { PrismaService } from '../../src/prisma/prisma.service';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { GoogleLoginDto } from './dto/google-login.dto';
+import { OAuth2Client } from 'google-auth-library';
 import bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
+  private googleOAuthClient: OAuth2Client;
+
   constructor(
-    private readonly authRepository: AuthRepository,
+    private readonly prismaService: PrismaService,
     private readonly jwtService: JwtService,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    this.googleOAuthClient = new OAuth2Client(
+      this.configService.get('GOOGLE_CLIENT_ID'),
+      this.configService.get('GOOGLE_CLIENT_SECRET'),
+      this.configService.get('GOOGLE_CALLBACK_URL'),
+    );
+  }
 
   async register(dto: RegisterDto) {
-    const existingUser = await this.authRepository.findByEmail(dto.email);
+    const existingUser = await this.prismaService.user.findUnique({
+      where: { email: dto.email },
+    });
 
     if (existingUser) {
       throw new BadRequestException('Email already exists');
@@ -22,11 +35,13 @@ export class AuthService {
 
     const hashedPassword = await bcrypt.hash(dto.password, 10);
 
-    const user = await this.authRepository.create({
-      name: dto.name,
-      email: dto.email,
-      password: hashedPassword,
-      phone: dto.phone,
+    const user = await this.prismaService.user.create({
+      data: {
+        name: dto.name,
+        email: dto.email,
+        password: hashedPassword,
+        phone: dto.phone,
+      },
     });
 
     return {
@@ -40,7 +55,9 @@ export class AuthService {
   }
 
   async login(dto: LoginDto) {
-    const user = await this.authRepository.findByEmail(dto.email);
+    const user = await this.prismaService.user.findUnique({
+      where: { email: dto.email },
+    });
 
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
@@ -52,8 +69,8 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    const payload = { sub: user.id, role: user.role };
-    const accessToken = await this.jwtService.signAsync(payload);
+    const jwtPayload = { sub: user.id, role: user.role };
+    const accessToken = await this.jwtService.signAsync(jwtPayload);
 
     return {
       userId: user.id,
@@ -63,20 +80,40 @@ export class AuthService {
     };
   }
 
-  async validateGoogleUser(dto: any) {
-    let user = await this.authRepository.findByEmail(dto.email);
+  async googleLogin(dto: GoogleLoginDto) {
+    const tikcet = await this.googleOAuthClient.verifyIdToken({
+      idToken: dto.idToken,
+      audience: this.configService.get<string>('GOOGLE_WEB_CLIENT_ID'),
+    });
+
+    const payload = tikcet.getPayload();
+
+    if (!payload || !payload.email) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    let user = await this.prismaService.user.findUnique({
+      where: { email: payload.email },
+    });
+
+    const { email, name, picture } = payload;
 
     if (!user) {
-      user = await this.authRepository.create({
-        name: `${dto.firstName} ${dto.lastName}`,
-        email: dto.email,
-        password: '',
-        phone: '',
+      const randomHashedPassword = await bcrypt.hash(payload.sub, 10);
+
+      user = await this.prismaService.user.create({
+        data: {
+          name: name ?? 'PuyPuy',
+          email,
+          password: randomHashedPassword,
+          phone: '',
+          avatar: picture,
+        },
       });
     }
 
-    const payload = { sub: user.id, role: user.role };
-    const accessToken = await this.jwtService.signAsync(payload);
+    const jwtPayload = { sub: user.id, role: user.role };
+    const accessToken = await this.jwtService.signAsync(jwtPayload);
 
     return {
       userId: user.id,
@@ -85,25 +122,4 @@ export class AuthService {
       accessToken,
     };
   }
-
-  async loginWithGoogle(idToken: string) {
-  const client = new OAuth2Client(process.env.GOOGLE_WEB_CLIENT_ID);
-  
-  const ticket = await client.verifyIdToken({
-    idToken,
-    audience: process.env.GOOGLE_WEB_CLIENT_ID,
-  });
-  
-  const payload = ticket.getPayload();
-  if (!payload || !payload.email) {
-    throw new UnauthorizedException('Invalid Google token');
-  }
-
-  return this.validateGoogleUser({
-    email: payload.email,
-    firstName: payload.given_name ?? '',
-    lastName: payload.family_name ?? '',
-  });
-}
-
 }

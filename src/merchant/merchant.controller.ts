@@ -8,7 +8,6 @@ import { CurrentUser } from '../../src/common/decorators/current-user.decorator'
 import { CurrentUserDto } from '../../src/common/dto/current-user.dto';
 import { GetMerchantsQueryDto } from './dto/get-merchants-query.dto';
 import { UpdateMerchantDto } from './dto/update-merchant.dto';
-
 import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('merchants')
