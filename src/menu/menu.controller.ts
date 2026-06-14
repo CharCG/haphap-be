@@ -16,7 +16,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.MERCHANT)
 export class MenuController {
-  constructor(private readonly menuService: MenuService) {}
+  constructor(private readonly menuService: MenuService) { }
 
   @Get()
   async findAll(@CurrentUser() user: CurrentUserDto) {

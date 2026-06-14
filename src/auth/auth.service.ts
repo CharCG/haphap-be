@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { GoogleLoginDto } from './dto/google-login.dto.';
+import { GoogleLoginDto } from './dto/google-login.dto';
 import { OAuth2Client } from 'google-auth-library';
 import bcrypt from 'bcrypt';
 

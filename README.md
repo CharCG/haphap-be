@@ -111,6 +111,7 @@ All endpoints return responses using the following standardized format:
 | ------ | ---------------- | ------ | ----------- |
 | `POST` | `/auth/register` | PUBLIC | \*          |
 | `POST` | `/auth/login`    | PUBLIC | \*          |
+| `POST` | `/auth/google`   | PUBLIC | \*          |
 
 ### Users (`/users`)
 
@@ -119,14 +120,15 @@ All endpoints return responses using the following standardized format:
 | `GET`   | `/users/me`          | CUSTOMER, MERCHANT | \*          |
 | `PATCH` | `/users/me`          | CUSTOMER, MERCHANT | \*          |
 | `PATCH` | `/users/me/password` | CUSTOMER, MERCHANT | \*          |
+| `POST`  | `/users/me/avatar`   | CUSTOMER, MERCHANT | \*          |
 
 ### Applications (`/applications`)
 
 | Method  | Endpoint                       | Access   | Description |
 | ------- | ------------------------------ | -------- | ----------- |
 | `GET`   | `/applications`                | ADMIN    | \*          |
-| `GET`   | `/applications/me`             | CUSTOMER | \*          |
 | `POST`  | `/applications`                | CUSTOMER | \*          |
+| `GET`   | `/applications/me`             | CUSTOMER | \*          |
 | `PATCH` | `/applications/:applicationId` | ADMIN    | \*          |
 
 ### Merchants (`/merchants`)
@@ -134,18 +136,20 @@ All endpoints return responses using the following standardized format:
 | Method  | Endpoint                 | Access   | Description |
 | ------- | ------------------------ | -------- | ----------- |
 | `GET`   | `/merchants`             | PUBLIC   | \*          |
-| `GET`   | `/merchants/:merchantId` | PUBLIC   | \*          |
 | `GET`   | `/merchants/me`          | MERCHANT | \*          |
 | `PATCH` | `/merchants/me`          | MERCHANT | \*          |
+| `GET`   | `/merchants/:merchantId` | PUBLIC   | \*          |
 
 ### Menus (`/menus`)
 
-| Method   | Endpoint             | Access   | Description |
-| -------- | -------------------- | -------- | ----------- |
-| `GET`    | `/menus`             | MERCHANT | \*          |
-| `POST`   | `/menus`             | MERCHANT | \*          |
-| `PATCH`  | `/menus/:menuItemId` | MERCHANT | \*          |
-| `DELETE` | `/menus/:menuItemId` | MERCHANT | \*          |
+| Method   | Endpoint                   | Access   | Description |
+| -------- | -------------------------- | -------- | ----------- |
+| `GET`    | `/menus`                   | MERCHANT | \*          |
+| `POST`   | `/menus`                   | MERCHANT | \*          |
+| `GET`    | `/menus/:menuItemId`       | MERCHANT | \*          |
+| `PATCH`  | `/menus/:menuItemId`       | MERCHANT | \*          |
+| `DELETE` | `/menus/:menuItemId`       | MERCHANT | \*          |
+| `POST`   | `/menus/:menuItemId/image` | MERCHANT | \*          |
 
 ### Surplus (`/surplus`)
 
@@ -157,13 +161,21 @@ All endpoints return responses using the following standardized format:
 
 ### Orders (`/orders`)
 
-| Method  | Endpoint           | Access             | Description |
-| ------- | ------------------ | ------------------ | ----------- |
-| `POST`  | `/orders`          | CUSTOMER           | \*          |
-| `GET`   | `/orders/:orderId` | CUSTOMER, MERCHANT | \*          |
-| `GET`   | `/orders/me`       | CUSTOMER           | \*          |
-| `GET`   | `/orders/merchant` | MERCHANT           | \*          |
-| `PATCH` | `/orders/scan`     | MERCHANT           | \*          |
+| Method  | Endpoint                | Access             | Description |
+| ------- | ----------------------- | ------------------ | ----------- |
+| `POST`  | `/orders`               | CUSTOMER           | \*          |
+| `GET`   | `/orders/me`            | CUSTOMER           | \*          |
+| `GET`   | `/orders/merchant`      | MERCHANT           | \*          |
+| `GET`   | `/orders/:orderId`      | CUSTOMER, MERCHANT | \*          |
+| `PATCH` | `/orders/:orderId/scan` | MERCHANT           | \*          |
+
+### Payments (`/payments`)
+
+| Method | Endpoint                    | Access   | Description |
+| ------ | --------------------------- | -------- | ----------- |
+| `POST` | `/payments/webhook`         | PUBLIC   | \*          |
+| `POST` | `/payments/:orderId`        | CUSTOMER | \*          |
+| `POST` | `/payments/:orderId/verify` | CUSTOMER | \*          |
 
 ### Reviews (`/reviews`)
 

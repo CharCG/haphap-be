@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Snap, CoreApi } from 'midtrans-client';
+import { Snap } from 'midtrans-client';
 import { CreateTransactionDto } from './dto/create-transaction.dto';
 import { MidtransWebhookDto } from './dto/midtrans-webhook.dto';
 import * as crypto from 'crypto';
@@ -8,7 +8,6 @@ import * as crypto from 'crypto';
 @Injectable()
 export class MidtransService {
   private midtransSnapClient: Snap;
-  // private core: CoreApi;
 
   constructor(private readonly configService: ConfigService) {
     this.midtransSnapClient = new Snap({
@@ -16,12 +15,6 @@ export class MidtransService {
       serverKey: configService.get<string>('MIDTRANS_SERVER_KEY') as any,
       clientKey: configService.get<string>('MIDTRANS_CLIENT_KEY') as any,
     });
-
-    // this.core = new CoreApi({
-    //   isProduction: configService.get<string>('MIDTRANS_IS_PRODUCTION') === 'true',
-    //   serverKey: configService.get<string>('MIDTRANS_SERVER_KEY') as any,
-    //   clientKey: configService.get<string>('MIDTRANS_CLIENT_KEY') as any,
-    // });
   }
 
   async createTransaction(dto: CreateTransactionDto) {

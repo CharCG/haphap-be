@@ -14,7 +14,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 @Controller('applications')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ApplicationController {
-  constructor(private readonly applicationService: ApplicationService) {}
+  constructor(private readonly applicationService: ApplicationService) { }
 
   @Get()
   @Roles(Role.ADMIN)
