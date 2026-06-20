@@ -7,220 +7,421 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL! });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  console.log('Start Database Seeding...');
+  console.log('Clearing existing data...');
 
-  await prisma.payment.deleteMany({});
   await prisma.review.deleteMany({});
+  await prisma.payment.deleteMany({});
   await prisma.orderItem.deleteMany({});
   await prisma.order.deleteMany({});
   await prisma.surplusItem.deleteMany({});
   await prisma.menuItem.deleteMany({});
-  await prisma.merchant.deleteMany({});
   await prisma.application.deleteMany({});
+  await prisma.merchant.deleteMany({});
   await prisma.user.deleteMany({});
+
+  console.log('Seeding database with initial data...');
 
   const hashedPassword = await bcrypt.hash('password123', 10);
 
-  console.log('Seeding users...');
-
-  const customerUser = await prisma.user.create({
-    data: {
-      email: 'customer@haphap.com',
-      name: 'Joni',
-      password: hashedPassword,
-      phone: '081234567890',
-      role: 'CUSTOMER',
-      totalSaved: 30000,
-      totalPortion: 2,
-    },
-  });
-
-  const merchantUser = await prisma.user.create({
-    data: {
-      email: 'merchant@haphap.com',
-      name: 'Joko',
-      password: hashedPassword,
-      phone: '081298765432',
-      role: 'MERCHANT',
-    },
-  });
-
-  const adminUser = await prisma.user.create({
+  const admin = await prisma.user.create({
     data: {
       email: 'admin@haphap.com',
-      name: 'Admin',
+      name: 'Budi Santoso',
       password: hashedPassword,
-      phone: '081200000000',
+      phone: '081100000000',
       role: 'ADMIN',
     },
   });
 
-  console.log('Seeding merchant profile...');
-
-  const merchant = await prisma.merchant.create({
+  const customerSiti = await prisma.user.create({
     data: {
-      userId: merchantUser.id,
-      merchantName: 'Sate Madura Pak Joko',
-      address: 'Jl. Melawai 5 No. 3, Kebayoran Baru, Jakarta Selatan',
-      latitude: -6.24432,
-      longitude: 106.7994,
-      description: 'Sate ayam dan sate kambing khas Madura legendaris',
+      email: 'siti@haphap.com',
+      name: 'Siti Aminah',
+      password: hashedPassword,
+      phone: '081211111111',
+      role: 'CUSTOMER',
+      totalSaved: 45000,
+      totalPortion: 3,
+    },
+  });
+
+  const customerAgus = await prisma.user.create({
+    data: {
+      email: 'agus@haphap.com',
+      name: 'Agus Pratama',
+      password: hashedPassword,
+      phone: '081222222222',
+      role: 'CUSTOMER',
+    },
+  });
+
+  const userMerchantAyu = await prisma.user.create({
+    data: {
+      email: 'ayu@haphap.com',
+      name: 'Ayu Lestari',
+      password: hashedPassword,
+      phone: '081233333333',
+      role: 'MERCHANT',
+    },
+  });
+
+  const userMerchantBambang = await prisma.user.create({
+    data: {
+      email: 'bambang@haphap.com',
+      name: 'Bambang Pamungkas',
+      password: hashedPassword,
+      phone: '081244444444',
+      role: 'MERCHANT',
+    },
+  });
+
+  const userMerchantCitra = await prisma.user.create({
+    data: {
+      email: 'citra@haphap.com',
+      name: 'Citra Kirana',
+      password: hashedPassword,
+      phone: '081255555555',
+      role: 'MERCHANT',
+    },
+  });
+
+  await prisma.application.create({
+    data: {
+      userId: userMerchantBambang.id,
+      merchantName: 'Warung Nasi Bambang',
+      status: 'PENDING',
+      address: 'Jl. Merdeka No. 10, Jakarta',
+      latitude: -6.2,
+      longitude: 106.816666,
+      description: 'Menjual aneka lauk pauk sisa hari ini',
+      openTime: '08:00',
+      closeTime: '20:00',
+      phone: '081244444444',
+      categories: ['RESTORAN'],
+    },
+  });
+
+  await prisma.application.create({
+    data: {
+      userId: userMerchantCitra.id,
+      merchantName: 'Toko Kue Citra',
+      status: 'REJECTED',
+      address: 'Jl. Sudirman No. 5, Jakarta',
+      latitude: -6.225014,
+      longitude: 106.804359,
+      description: 'Kue kering dan basah',
+      openTime: '09:00',
+      closeTime: '17:00',
+      phone: '081255555555',
+      categories: ['ROTI', 'PENUTUP'],
+      rejectNote: 'Foto KTP buram dan tidak terbaca jelas.',
+      reviewedAt: new Date(),
+    },
+  });
+
+  await prisma.application.create({
+    data: {
+      userId: userMerchantAyu.id,
+      merchantName: 'Kedai Kopi Bu Ayu',
+      status: 'APPROVED',
+      address: 'Jl. Diponegoro No. 15, Bandung',
+      latitude: -6.903444,
+      longitude: 107.618774,
+      description: 'Kopi susu gula aren dan camilan lokal',
       openTime: '10:00',
       closeTime: '22:00',
-      phone: '081234567892',
-      categories: ['RESTORAN', 'JAJANAN'],
-      rating: 4.8,
-      totalRevenue: 20000,
-      totalPortion: 1,
+      phone: '081233333333',
+      categories: ['KAFE', 'JAJANAN'],
+      reviewedAt: new Date(),
     },
   });
 
-  console.log('Seeding menu items...');
-
-  const item1 = await prisma.menuItem.create({
+  const merchantAyu = await prisma.merchant.create({
     data: {
-      merchantId: merchant.id,
-      name: 'Sate Ayam Madura',
-      description: '10 tusuk sate ayam dengan bumbu kacang gurih dan lontong',
-      originalPrice: 40000,
+      userId: userMerchantAyu.id,
+      merchantName: 'Kedai Kopi Bu Ayu',
+      address: 'Jl. Diponegoro No. 15, Bandung',
+      latitude: -6.903444,
+      longitude: 107.618774,
+      description: 'Kopi susu gula aren dan camilan lokal',
+      openTime: '10:00',
+      closeTime: '22:00',
+      phone: '081233333333',
+      categories: ['KAFE', 'JAJANAN'],
+      rating: 4.5,
+      totalRevenue: 65000,
+      totalPortion: 3,
+    },
+  });
+
+  const menuKopi = await prisma.menuItem.create({
+    data: {
+      merchantId: merchantAyu.id,
+      name: 'Es Kopi Susu Gula Aren',
+      description: 'Kopi susu andalan dengan gula aren asli',
+      originalPrice: 20000,
       isActive: true,
     },
   });
 
-  const item2 = await prisma.menuItem.create({
+  const menuRoti = await prisma.menuItem.create({
     data: {
-      merchantId: merchant.id,
-      name: 'Sate Kambing Muda',
-      description: '10 tusuk sate kambing dengan bumbu kecap pedas mantap',
-      originalPrice: 60000,
+      merchantId: merchantAyu.id,
+      name: 'Roti Bakar Coklat Keju',
+      description: 'Roti bakar tebal lumer',
+      originalPrice: 25000,
       isActive: true,
     },
   });
 
-  console.log('Seeding surplus items...');
+  const menuNonaktif = await prisma.menuItem.create({
+    data: {
+      merchantId: merchantAyu.id,
+      name: 'Donat Kampung',
+      description: 'Donat gula halus',
+      originalPrice: 10000,
+      isActive: false,
+    },
+  });
 
   const today = new Date();
 
-  const surplus1 = await prisma.surplusItem.create({
+  const surplusKopi = await prisma.surplusItem.create({
     data: {
-      menuItemId: item1.id,
-      merchantId: merchant.id,
-      discountPrice: 20000,
-      originalPrice: 40000,
-      stock: 10,
+      menuItemId: menuKopi.id,
+      merchantId: merchantAyu.id,
+      discountPrice: 10000,
+      originalPrice: 20000,
+      stock: 8,
       isActive: true,
       date: today,
     },
   });
 
-  const surplus2 = await prisma.surplusItem.create({
+  const surplusRoti = await prisma.surplusItem.create({
     data: {
-      menuItemId: item2.id,
-      merchantId: merchant.id,
-      discountPrice: 30000,
-      originalPrice: 60000,
-      stock: 5,
+      menuItemId: menuRoti.id,
+      merchantId: merchantAyu.id,
+      discountPrice: 12000,
+      originalPrice: 25000,
+      stock: 3,
       isActive: true,
       date: today,
     },
   });
 
-  console.log('Seeding orders...');
-
-  // Pending Order
-  const pendingExpiredAt = new Date();
-  pendingExpiredAt.setMinutes(pendingExpiredAt.getMinutes() + 15);
-
-  const pendingOrder = await prisma.order.create({
+  const surplusHabis = await prisma.surplusItem.create({
     data: {
-      userId: customerUser.id,
-      merchantId: merchant.id,
+      menuItemId: menuKopi.id,
+      merchantId: merchantAyu.id,
+      discountPrice: 10000,
+      originalPrice: 20000,
+      stock: 0,
+      isActive: false,
+      date: today,
+    },
+  });
+
+  const now = new Date();
+  const future15 = new Date(now.getTime() + 15 * 60000);
+  const past60 = new Date(now.getTime() - 60 * 60000);
+  const past30 = new Date(now.getTime() - 30 * 60000);
+
+  const orderPending = await prisma.order.create({
+    data: {
+      userId: customerSiti.id,
+      merchantId: merchantAyu.id,
       status: 'PENDING',
-      totalAmount: 50000, // (20000 * 1) + (30000 * 1)
-      totalOriginal: 100000, // (40000 * 1) + (60000 * 1)
-      notes: 'Tolong sambelnya dipisah ya',
-      expiredAt: pendingExpiredAt,
-      qrCode: `pending-order-qr-${Date.now()}`,
+      totalAmount: 10000,
+      totalOriginal: 20000,
+      qrCode: `QR-PENDING-${Date.now()}`,
+      expiredAt: future15,
       orderItems: {
         create: [
           {
-            surplusItemId: surplus1.id,
-            name: item1.name,
+            surplusItemId: surplusKopi.id,
+            name: menuKopi.name,
             quantity: 1,
-            discountPrice: 20000,
-            originalPrice: 40000,
-          },
-          {
-            surplusItemId: surplus2.id,
-            name: item2.name,
-            quantity: 1,
-            discountPrice: 30000,
-            originalPrice: 60000,
+            discountPrice: 10000,
+            originalPrice: 20000,
           },
         ],
       },
     },
   });
-
-  // Completed Order
-  const completedOrder = await prisma.order.create({
-    data: {
-      userId: customerUser.id,
-      merchantId: merchant.id,
-      status: 'COMPLETED',
-      totalAmount: 20000, // (20000 * 1)
-      totalOriginal: 40000, // (40000 * 1)
-      notes: null,
-      expiredAt: new Date(Date.now() - 60 * 60 * 1000), // expired 1 hour ago
-      completedAt: new Date(),
-      qrCode: `completed-order-qr-${Date.now()}`,
-      orderItems: {
-        create: [
-          {
-            surplusItemId: surplus1.id,
-            name: item1.name,
-            quantity: 1,
-            discountPrice: 20000,
-            originalPrice: 40000,
-          },
-        ],
-      },
-    },
-  });
-
-  console.log('Seeding payment...');
 
   await prisma.payment.create({
     data: {
-      orderId: completedOrder.id,
-      transactionId: `TX-MOCK-${Date.now()}`,
+      orderId: orderPending.id,
+      transactionId: `TX-PENDING-${Date.now()}`,
+      status: 'PENDING',
+      amount: 10000,
+      snapToken: 'snap-token-mock-123',
+    },
+  });
+
+  const orderProcessing = await prisma.order.create({
+    data: {
+      userId: customerAgus.id,
+      merchantId: merchantAyu.id,
+      status: 'PROCESSING',
+      totalAmount: 22000,
+      totalOriginal: 45000,
+      qrCode: `QR-PROCESSING-${Date.now()}`,
+      notes: 'Es dipisah',
+      expiredAt: future15,
+      paidAt: past30,
+      orderItems: {
+        create: [
+          {
+            surplusItemId: surplusKopi.id,
+            name: menuKopi.name,
+            quantity: 1,
+            discountPrice: 10000,
+            originalPrice: 20000,
+          },
+          {
+            surplusItemId: surplusRoti.id,
+            name: menuRoti.name,
+            quantity: 1,
+            discountPrice: 12000,
+            originalPrice: 25000,
+          },
+        ],
+      },
+    },
+  });
+
+  await prisma.payment.create({
+    data: {
+      orderId: orderProcessing.id,
+      transactionId: `TX-PROC-${Date.now()}`,
       status: 'SUCCESS',
+      amount: 22000,
+    },
+  });
+
+  const orderCompleted = await prisma.order.create({
+    data: {
+      userId: customerSiti.id,
+      merchantId: merchantAyu.id,
+      status: 'COMPLETED',
+      totalAmount: 32000,
+      totalOriginal: 65000,
+      qrCode: `QR-COMPLETED-${Date.now()}`,
+      expiredAt: past60,
+      paidAt: past60,
+      completedAt: past30,
+      orderItems: {
+        create: [
+          {
+            surplusItemId: surplusKopi.id,
+            name: menuKopi.name,
+            quantity: 2,
+            discountPrice: 10000,
+            originalPrice: 20000,
+          },
+          {
+            surplusItemId: surplusRoti.id,
+            name: menuRoti.name,
+            quantity: 1,
+            discountPrice: 12000,
+            originalPrice: 25000,
+          },
+        ],
+      },
+    },
+  });
+
+  await prisma.payment.create({
+    data: {
+      orderId: orderCompleted.id,
+      transactionId: `TX-COMP-${Date.now()}`,
+      status: 'SUCCESS',
+      amount: 32000,
+    },
+  });
+
+  await prisma.review.create({
+    data: {
+      userId: customerSiti.id,
+      merchantId: merchantAyu.id,
+      orderId: orderCompleted.id,
+      rating: 5,
+      comment: 'Kopinya masih sangat layak minum dan rotinya enak!',
+    },
+  });
+
+  const orderCancelledExpired = await prisma.order.create({
+    data: {
+      userId: customerAgus.id,
+      merchantId: merchantAyu.id,
+      status: 'CANCELLED',
+      totalAmount: 12000,
+      totalOriginal: 25000,
+      qrCode: `QR-CANC-EXP-${Date.now()}`,
+      expiredAt: past60,
+      orderItems: {
+        create: [
+          {
+            surplusItemId: surplusRoti.id,
+            name: menuRoti.name,
+            quantity: 1,
+            discountPrice: 12000,
+            originalPrice: 25000,
+          },
+        ],
+      },
+    },
+  });
+
+  await prisma.payment.create({
+    data: {
+      orderId: orderCancelledExpired.id,
+      transactionId: `TX-EXP-${Date.now()}`,
+      status: 'EXPIRED',
+      amount: 12000,
+    },
+  });
+
+  const orderCancelledFailed = await prisma.order.create({
+    data: {
+      userId: customerSiti.id,
+      merchantId: merchantAyu.id,
+      status: 'CANCELLED',
+      totalAmount: 20000,
+      totalOriginal: 40000,
+      qrCode: `QR-CANC-FAIL-${Date.now()}`,
+      expiredAt: future15,
+      orderItems: {
+        create: [
+          {
+            surplusItemId: surplusKopi.id,
+            name: menuKopi.name,
+            quantity: 2,
+            discountPrice: 10000,
+            originalPrice: 20000,
+          },
+        ],
+      },
+    },
+  });
+
+  await prisma.payment.create({
+    data: {
+      orderId: orderCancelledFailed.id,
+      transactionId: `TX-FAIL-${Date.now()}`,
+      status: 'FAILED',
       amount: 20000,
     },
   });
 
-  console.log('Seeding review...');
-
-  await prisma.review.create({
-    data: {
-      userId: customerUser.id,
-      merchantId: merchant.id,
-      orderId: completedOrder.id,
-      rating: 5,
-      comment: 'Makanan enak, pelayanan ramah sekali!',
-    },
-  });
-
-  console.log('Database seeding completed!');
-  console.log('\n--- Seeded Accounts ---');
-  console.log(`Customer: customer@haphap.com / password123`);
-  console.log(`Merchant: merchant@haphap.com / password123`);
-  console.log(`Admin: admin@haphap.com / password123`);
+  console.log('Database seeding completed successfully.');
 }
 
 main()
   .catch((e) => {
-    console.error('Error during seeding:', e);
+    console.error(e);
     process.exit(1);
   })
   .finally(async () => {
