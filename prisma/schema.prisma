@@ -32,7 +32,7 @@ enum MerchantCategory {
 enum OrderStatus {
   PENDING
   PROCESSING
-  PREPARING
+  READY
   COMPLETED
   CANCELLED
 }

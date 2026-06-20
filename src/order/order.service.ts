@@ -57,7 +57,6 @@ export class OrderService {
           totalOriginal,
           notes: dto.notes,
           expiredAt,
-          qrCode: '',
           orderItems: {
             createMany: { data: orderItemsData },
           },
@@ -65,22 +64,13 @@ export class OrderService {
         include: { orderItems: true },
       });
 
-      const qrCode = await QrCodeUtil.generateToken(createdOrder.id);
-
-      const updatedOrder = await prisma.order.update({
-        where: { id: createdOrder.id },
-        data: { qrCode },
-        include: { orderItems: true },
-      });
-
-      return updatedOrder;
+      return createdOrder;
     });
 
     return {
       orderId: order.id,
       totalAmount: order.totalAmount,
       expiredAt: order.expiredAt,
-      qrCode: order.qrCode,
       createdAt: order.createdAt,
     };
   }
@@ -154,7 +144,7 @@ export class OrderService {
 
     return this.prismaService.order.update({
       where: { id: orderId },
-      data: { status: OrderStatus.PREPARING },
+      data: { status: OrderStatus.READY },
       include: { orderItems: true },
     });
   }
@@ -192,7 +182,7 @@ export class OrderService {
       throw new ForbiddenException('You are not authorized to scan this order');
     }
 
-    if (order.status !== OrderStatus.PREPARING) {
+    if (order.status !== OrderStatus.READY) {
       throw new BadRequestException('Order is not in a valid state to be scanned');
     }
 
@@ -210,5 +200,26 @@ export class OrderService {
     });
 
     return updatedOrder;
+  }
+
+  async readyOrder(orderId: string, userId: string) {
+    const order = await this.prismaService.order.findUnique({
+      where: { id: orderId },
+      include: { merchant: true },
+    });
+
+    if (!order) throw new NotFoundException('Order not found');
+    if (order.merchant.userId !== userId) throw new ForbiddenException('You are not authorized');
+    if (order.status !== OrderStatus.READY) {
+      throw new BadRequestException('Order is not in a valid state to be marked ready');
+    }
+
+    const qrCode = await QrCodeUtil.generateToken(orderId);
+
+    return this.prismaService.order.update({
+      where: { id: orderId },
+      data: { qrCode },
+      include: { orderItems: true },
+    });
   }
 }

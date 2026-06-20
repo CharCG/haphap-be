@@ -57,4 +57,10 @@ export class OrderController {
   async scanOrder(@Param('orderId') orderId: string, @CurrentUser() currentUser: CurrentUserDto, @Body() dto: ScanOrderDto) {
     return await this.orderService.scanOrder(orderId, currentUser.id, dto.qrCode);
   }
-}
+
+  @Patch(':orderId/ready')
+  @Roles(Role.MERCHANT)
+  async readyOrder(@Param('orderId') orderId: string, @CurrentUser() currentUser: CurrentUserDto) {
+    return await this.orderService.readyOrder(orderId, currentUser.id);
+  }
+}
