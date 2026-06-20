@@ -33,7 +33,7 @@ async function main() {
     },
   });
 
-  const customerSiti = await prisma.user.create({
+  const userCustomerSiti = await prisma.user.create({
     data: {
       email: 'siti@haphap.com',
       name: 'Siti Aminah',
@@ -45,7 +45,7 @@ async function main() {
     },
   });
 
-  const customerAgus = await prisma.user.create({
+  const userCustomerAgus = await prisma.user.create({
     data: {
       email: 'agus@haphap.com',
       name: 'Agus Pratama',
@@ -71,7 +71,7 @@ async function main() {
       name: 'Bambang Pamungkas',
       password: hashedPassword,
       phone: '081244444444',
-      role: 'MERCHANT',
+      role: 'CUSTOMER',
     },
   });
 
@@ -81,7 +81,7 @@ async function main() {
       name: 'Citra Kirana',
       password: hashedPassword,
       phone: '081255555555',
-      role: 'MERCHANT',
+      role: 'CUSTOMER',
     },
   });
 
@@ -229,7 +229,7 @@ async function main() {
 
   const orderPending = await prisma.order.create({
     data: {
-      userId: customerSiti.id,
+      userId: userCustomerSiti.id,
       merchantId: merchantAyu.id,
       status: 'PENDING',
       totalAmount: 10000,
@@ -262,7 +262,7 @@ async function main() {
 
   const orderProcessing = await prisma.order.create({
     data: {
-      userId: customerAgus.id,
+      userId: userCustomerAgus.id,
       merchantId: merchantAyu.id,
       status: 'PROCESSING',
       totalAmount: 22000,
@@ -303,7 +303,7 @@ async function main() {
 
   const orderCompleted = await prisma.order.create({
     data: {
-      userId: customerSiti.id,
+      userId: userCustomerSiti.id,
       merchantId: merchantAyu.id,
       status: 'COMPLETED',
       totalAmount: 32000,
@@ -344,8 +344,8 @@ async function main() {
 
   await prisma.review.create({
     data: {
-      userId: customerSiti.id,
-      merchantId: merchantAyu.id,
+      userId: userCustomerSiti.id,
+      merchantId: userMerchantAyu.id,
       orderId: orderCompleted.id,
       rating: 5,
       comment: 'Kopinya masih sangat layak minum dan rotinya enak!',
@@ -354,7 +354,7 @@ async function main() {
 
   const orderCancelledExpired = await prisma.order.create({
     data: {
-      userId: customerAgus.id,
+      userId: userCustomerAgus.id,
       merchantId: merchantAyu.id,
       status: 'CANCELLED',
       totalAmount: 12000,
@@ -386,7 +386,7 @@ async function main() {
 
   const orderCancelledFailed = await prisma.order.create({
     data: {
-      userId: customerSiti.id,
+      userId: userCustomerSiti.id,
       merchantId: merchantAyu.id,
       status: 'CANCELLED',
       totalAmount: 20000,
