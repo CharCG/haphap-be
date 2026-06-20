@@ -345,7 +345,7 @@ async function main() {
   await prisma.review.create({
     data: {
       userId: userCustomerSiti.id,
-      merchantId: userMerchantAyu.id,
+      merchantId: merchantAyu.id,
       orderId: orderCompleted.id,
       rating: 5,
       comment: 'Kopinya masih sangat layak minum dan rotinya enak!',
