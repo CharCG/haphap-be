@@ -140,6 +140,44 @@ export class OrderService {
     });
   }
 
+  async acceptOrder(orderId: string, userId: string) {
+    const order = await this.prismaService.order.findUnique({
+      where: { id: orderId },
+      include: { merchant: true },
+    });
+
+    if (!order) throw new NotFoundException('Order not found');
+    if (order.merchant.userId !== userId) throw new ForbiddenException('You are not authorized');
+    if (order.status !== OrderStatus.PROCESSING) {
+      throw new BadRequestException('Order is not in a valid state to be accepted');
+    }
+
+    return this.prismaService.order.update({
+      where: { id: orderId },
+      data: { status: OrderStatus.PREPARING },
+      include: { orderItems: true },
+    });
+  }
+
+  async rejectOrder(orderId: string, userId: string) {
+    const order = await this.prismaService.order.findUnique({
+      where: { id: orderId },
+      include: { merchant: true },
+    });
+
+    if (!order) throw new NotFoundException('Order not found');
+    if (order.merchant.userId !== userId) throw new ForbiddenException('You are not authorized');
+    if (order.status !== OrderStatus.PROCESSING) {
+      throw new BadRequestException('Order is not in a valid state to be rejected');
+    }
+
+    return this.prismaService.order.update({
+      where: { id: orderId },
+      data: { status: OrderStatus.CANCELLED },
+      include: { orderItems: true },
+    });
+  }
+
   async scanOrder(orderId: string, userId: string, qrCode: string) {
     const order = await this.prismaService.order.findUnique({
       where: { id: orderId },
@@ -154,7 +192,7 @@ export class OrderService {
       throw new ForbiddenException('You are not authorized to scan this order');
     }
 
-    if (order.status !== OrderStatus.PROCESSING) {
+    if (order.status !== OrderStatus.PREPARING) {
       throw new BadRequestException('Order is not in a valid state to be scanned');
     }
 

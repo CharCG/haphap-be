@@ -40,9 +40,21 @@ export class OrderController {
     return await this.orderService.findOrderById(orderId, user);
   }
   
+  @Patch(':orderId/accept')
+  @Roles(Role.MERCHANT)
+  async acceptOrder(@Param('orderId') orderId: string, @CurrentUser() currentUser: CurrentUserDto) {
+    return await this.orderService.acceptOrder(orderId, currentUser.id);
+  }
+
+  @Patch(':orderId/reject')
+  @Roles(Role.MERCHANT)
+  async rejectOrder(@Param('orderId') orderId: string, @CurrentUser() currentUser: CurrentUserDto) {
+    return await this.orderService.rejectOrder(orderId, currentUser.id);
+  }
+
   @Patch(':orderId/scan')
   @Roles(Role.MERCHANT)
   async scanOrder(@Param('orderId') orderId: string, @CurrentUser() currentUser: CurrentUserDto, @Body() dto: ScanOrderDto) {
     return await this.orderService.scanOrder(orderId, currentUser.id, dto.qrCode);
   }
-} 
+}
