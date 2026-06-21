@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Patch, Post, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ApplicationService } from './application.service';
 import { JwtAuthGuard } from '../../src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../src/auth/guards/roles.guard';
@@ -8,7 +9,7 @@ import { CurrentUser } from '../../src/common/decorators/current-user.decorator'
 import { CurrentUserDto } from '../../src/common/dto/current-user.dto';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { UpdateApplicationDto } from './dto/update-application.dto';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 
 @ApiBearerAuth()
 @Controller('applications')
@@ -24,8 +25,21 @@ export class ApplicationController {
 
   @Post()
   @Roles(Role.CUSTOMER)
-  async create(@CurrentUser() user: CurrentUserDto, @Body() dto: CreateApplicationDto) {
-    return this.applicationService.create(user.id, dto);
+  @UseInterceptors(FileFieldsInterceptor([
+    { name: 'avatar', maxCount: 1 },
+    { name: 'document', maxCount: 1 },
+  ]))
+  @ApiConsumes('multipart/form-data')
+  async create(
+    @CurrentUser() user: CurrentUserDto,
+    @Body() dto: CreateApplicationDto,
+    @UploadedFiles() files: { avatar?: Express.Multer.File[]; document?: Express.Multer.File[] },
+  ) {
+    if (!files?.document || files.document.length === 0) {
+      throw new BadRequestException('Document file is required');
+    }
+
+    return this.applicationService.create(user.id, dto, files.avatar?.[0], files.document[0]);
   }
 
   @Get('me')

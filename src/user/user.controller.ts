@@ -9,7 +9,7 @@ import { CurrentUser } from '../../src/common/decorators/current-user.decorator'
 import { CurrentUserDto } from '../../src/common/dto/current-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 
 @ApiBearerAuth()
 @Controller('users')
@@ -35,6 +35,7 @@ export class UserController {
 
   @Post('me/avatar')
   @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
   async uploadAvatar(
     @CurrentUser() user: CurrentUserDto,
     @UploadedFile() file: Express.Multer.File,

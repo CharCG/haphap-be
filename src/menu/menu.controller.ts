@@ -9,7 +9,7 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { CurrentUserDto } from '../common/dto/current-user.dto';
 import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 
 @ApiBearerAuth()
 @Controller('menus')
@@ -49,6 +49,7 @@ export class MenuController {
 
   @Post(':menuItemId/image')
   @UseInterceptors(FileInterceptor('file'))
+  @ApiConsumes('multipart/form-data')
   async uploadImage(
     @CurrentUser() user: CurrentUserDto,
     @Param('menuItemId') menuItemId: string,

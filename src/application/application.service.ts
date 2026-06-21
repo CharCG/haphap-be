@@ -1,12 +1,18 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../src/prisma/prisma.service';
+import { StorageService } from '../common/storage/storage.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { UpdateApplicationDto } from './dto/update-application.dto';
 import { ApplicationStatus, Role } from '../generated/prisma/enums';
 
 @Injectable()
 export class ApplicationService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly prismaService: PrismaService,
+    private readonly storageService: StorageService,
+  ) {}
 
   async findAll() {
     const applications = await this.prismaService.application.findMany({
@@ -20,6 +26,7 @@ export class ApplicationService {
       userEmail: a.user.email,
       userPhone: a.user.phone,
       merchantName: a.merchantName,
+      merchantOwner: a.merchantOwner,
       status: a.status,
       address: a.address,
       latitude: a.latitude,
@@ -28,7 +35,12 @@ export class ApplicationService {
       openTime: a.openTime,
       closeTime: a.closeTime,
       phone: a.phone,
+      avatar: a.avatar,
       categories: a.categories,
+      bankType: a.bankType,
+      bankAccount: a.bankAccount,
+      bankHolder: a.bankHolder,
+      document: a.document,
       rejectNote: a.rejectNote,
       reviewedAt: a.reviewedAt,
       createdAt: a.createdAt,
@@ -51,7 +63,12 @@ export class ApplicationService {
     }));
   }
 
-  async create(userId: string, dto: CreateApplicationDto) {
+  async create(
+    userId: string,
+    dto: CreateApplicationDto,
+    avatarFile: Express.Multer.File | undefined,
+    documentFile: Express.Multer.File,
+  ) {
     const activeApps = await this.prismaService.application.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
@@ -63,16 +80,31 @@ export class ApplicationService {
       throw new BadRequestException('You already have a pending application');
     }
 
+    const avatarBucketName = this.configService.get<string>('SUPABASE_APPLICATION_AVATAR_BUCKET')!;
+    let avatarUrl: string | undefined = undefined;
+
+    if (avatarFile) {
+      avatarUrl = await this.storageService.uploadFile(avatarFile, avatarBucketName, userId);
+    }
+
+    const documentBucketName = this.configService.get<string>('SUPABASE_APPLICATION_DOCUMENT_BUCKET')!;
+    const documentUrl = await this.storageService.uploadFile(documentFile, documentBucketName, userId); 
+
     const application = await this.prismaService.application.create({
       data: {
         ...dto,
+        latitude: typeof dto.latitude === 'string' ? parseFloat(dto.latitude) : dto.latitude,
+        longitude: typeof dto.longitude === 'string' ? parseFloat(dto.longitude) : dto.longitude,
         userId,
+        avatar: avatarUrl,
+        document: documentUrl,
       },
     });
 
     return {
       applicationId: application.id,
       merchantName: application.merchantName,
+      merchantOwner: application.merchantOwner,
       status: application.status,
       address: application.address,
       latitude: application.latitude,
@@ -81,7 +113,12 @@ export class ApplicationService {
       openTime: application.openTime,
       closeTime: application.closeTime,
       phone: application.phone,
+      avatar: application.avatar,
       categories: application.categories,
+      bankType: application.bankType,
+      bankAccount: application.bankAccount,
+      bankHolder: application.bankHolder,
+      document: application.document,
       createdAt: application.createdAt,
     };
   }
@@ -119,6 +156,7 @@ export class ApplicationService {
             openTime: application.openTime,
             closeTime: application.closeTime,
             phone: application.phone,
+            avatar: application.avatar,
             categories: application.categories,
           },
         }),

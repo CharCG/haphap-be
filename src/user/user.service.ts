@@ -91,7 +91,7 @@ export class UserService {
       throw new BadRequestException('File is required');
     }
 
-    const bucketName = this.configService.get<string>('SUPABASE_USER_BUCKET')!;
+    const bucketName = this.configService.get<string>('SUPABASE_USER_AVATAR_BUCKET')!;
     const avatarUrl = await this.storageService.uploadFile(file, bucketName, userId);
 
     const updatedUser = await this.prismaService.user.update({

@@ -20,6 +20,23 @@ enum ApplicationStatus {
   REJECTED
 }
 
+enum BankType {
+  BCA
+  BRI
+  MANDIRI
+  BNI
+  CIMB
+  DANAMON
+  PERMATA
+  BTN
+  MAYBANK
+  OCBC
+  PANIN
+  SINARMAS
+  BTPN
+  MEGA
+}
+
 enum MerchantCategory {
   ROTI
   RESTORAN
@@ -68,19 +85,25 @@ model User {
 }
 
 model Application {
-  id           String             @id @default(uuid())
-  userId       String
-  merchantName String
-  status       ApplicationStatus  @default(PENDING)
-  address      String
-  latitude     Float
-  longitude    Float
-  description  String?
-  openTime     String
-  closeTime    String
-  phone        String
-  categories   MerchantCategory[]
-  rejectNote   String?
+  id            String             @id @default(uuid())
+  userId        String
+  merchantName  String
+  merchantOwner String
+  status        ApplicationStatus  @default(PENDING)
+  address       String
+  latitude      Float
+  longitude     Float
+  description   String?
+  openTime      String
+  closeTime     String
+  phone         String
+  avatar        String?
+  categories    MerchantCategory[]
+  bankType      BankType
+  bankAccount   String
+  bankHolder    String
+  document      String
+  rejectNote    String?
 
   reviewedAt DateTime?
   createdAt  DateTime  @default(now())

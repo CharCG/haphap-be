@@ -144,7 +144,7 @@ export class MenuService {
     const merchantId = await this.getMerchantIdByUserId(userId);
     await this.validateMenuOwner(menuItemId, merchantId);
 
-    const bucketName = this.configService.get<string>('SUPABASE_MENU_BUCKET')!;
+    const bucketName = this.configService.get<string>('SUPABASE_MENU_IMAGE_BUCKET')!;
     const imageUrl = await this.storageService.uploadFile(file, bucketName, menuItemId);
 
     const updatedMenuItem = await this.prismaService.menuItem.update({

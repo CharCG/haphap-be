@@ -89,6 +89,7 @@ async function main() {
     data: {
       userId: userMerchantBambang.id,
       merchantName: 'Warung Nasi Bambang',
+      merchantOwner: 'Bambang Pamungkas',
       status: 'PENDING',
       address: 'Jl. Merdeka No. 10, Jakarta',
       latitude: -6.2,
@@ -98,6 +99,10 @@ async function main() {
       closeTime: '20:00',
       phone: '081244444444',
       categories: ['RESTORAN'],
+      bankType: 'BCA',
+      bankAccount: '1234567890',
+      bankHolder: 'Bambang Pamungkas',
+      document: 'https://example.com/doc_bambang.pdf',
     },
   });
 
@@ -105,6 +110,7 @@ async function main() {
     data: {
       userId: userMerchantCitra.id,
       merchantName: 'Toko Kue Citra',
+      merchantOwner: 'Citra Kirana',
       status: 'REJECTED',
       address: 'Jl. Sudirman No. 5, Jakarta',
       latitude: -6.225014,
@@ -114,6 +120,10 @@ async function main() {
       closeTime: '17:00',
       phone: '081255555555',
       categories: ['ROTI', 'PENUTUP'],
+      bankType: 'MANDIRI',
+      bankAccount: '0987654321',
+      bankHolder: 'Citra Kirana',
+      document: 'https://example.com/doc_citra.pdf',
       rejectNote: 'Foto KTP buram dan tidak terbaca jelas.',
       reviewedAt: new Date(),
     },
@@ -123,6 +133,7 @@ async function main() {
     data: {
       userId: userMerchantAyu.id,
       merchantName: 'Kedai Kopi Bu Ayu',
+      merchantOwner: 'Ayu Lestari',
       status: 'APPROVED',
       address: 'Jl. Diponegoro No. 15, Bandung',
       latitude: -6.903444,
@@ -132,6 +143,10 @@ async function main() {
       closeTime: '22:00',
       phone: '081233333333',
       categories: ['KAFE', 'JAJANAN'],
+      bankType: 'BRI',
+      bankAccount: '1122334455',
+      bankHolder: 'Ayu Lestari',
+      document: 'https://example.com/doc_ayu.pdf',
       reviewedAt: new Date(),
     },
   });
