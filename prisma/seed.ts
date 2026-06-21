@@ -103,6 +103,7 @@ async function main() {
       bankAccount: '1234567890',
       bankHolder: 'Bambang Pamungkas',
       document: 'https://example.com/doc_bambang.pdf',
+      avatar: 'https://api.dicebear.com/9.x/adventurer/png?seed=bambang',
     },
   });
 
@@ -124,6 +125,7 @@ async function main() {
       bankAccount: '0987654321',
       bankHolder: 'Citra Kirana',
       document: 'https://example.com/doc_citra.pdf',
+      avatar: 'https://api.dicebear.com/9.x/adventurer/png?seed=citra',
       rejectNote: 'Foto KTP buram dan tidak terbaca jelas.',
       reviewedAt: new Date(),
     },
@@ -147,6 +149,7 @@ async function main() {
       bankAccount: '1122334455',
       bankHolder: 'Ayu Lestari',
       document: 'https://example.com/doc_ayu.pdf',
+      avatar: 'https://api.dicebear.com/9.x/adventurer/png?seed=ayu',
       reviewedAt: new Date(),
     },
   });
@@ -162,6 +165,7 @@ async function main() {
       openTime: '10:00',
       closeTime: '22:00',
       phone: '081233333333',
+      avatar: 'https://api.dicebear.com/9.x/adventurer/png?seed=ayu',
       categories: ['KAFE', 'JAJANAN'],
       rating: 4.5,
       totalRevenue: 65000,

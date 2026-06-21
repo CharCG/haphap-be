@@ -97,7 +97,7 @@ model Application {
   openTime      String
   closeTime     String
   phone         String
-  avatar        String?
+  avatar        String
   categories    MerchantCategory[]
   bankType      BankType
   bankAccount   String
