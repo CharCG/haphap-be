@@ -12,7 +12,7 @@ export class ApplicationService {
     private readonly configService: ConfigService,
     private readonly prismaService: PrismaService,
     private readonly storageService: StorageService,
-  ) { }
+  ) {}
 
   async findAll() {
     const applications = await this.prismaService.application.findMany({
