@@ -190,14 +190,25 @@ export class OrderService {
       throw new BadRequestException('Invalid QR code');
     }
 
-    const updatedOrder = await this.prismaService.order.update({
-      where: { id: orderId },
-      data: {
-        status: OrderStatus.COMPLETED,
-        paidAt: new Date(),
-      },
-      include: { orderItems: true },
-    });
+    const totalQuantity = order.orderItems.reduce((sum, item) => sum + item.quantity, 0);
+
+    const [updatedOrder] = await this.prismaService.$transaction([
+      this.prismaService.order.update({
+        where: { id: orderId },
+        data: {
+          status: OrderStatus.COMPLETED,
+          paidAt: new Date(),
+        },
+        include: { orderItems: true },
+      }),
+      this.prismaService.merchant.update({
+        where: { id: order.merchantId },
+        data: {
+          totalRevenue: { increment: order.totalAmount },
+          totalPortion: { increment: totalQuantity },
+        },
+      }),
+    ]);
 
     return updatedOrder;
   }
