@@ -125,7 +125,7 @@ model Merchant {
   openTime     String // "HH:mm"
   closeTime    String // "HH:mm"
   phone        String
-  avatar       String?
+  avatar       String
   categories   MerchantCategory[]
 
   rating       Float @default(0)
