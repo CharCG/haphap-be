@@ -12,7 +12,7 @@ export class UserService {
     private readonly prismaService: PrismaService,
     private readonly storageService: StorageService,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   async getMe(userId: string) {
     const user = await this.prismaService.user.findUnique({
@@ -29,6 +29,7 @@ export class UserService {
       email: user.email,
       phone: user.phone,
       avatar: user.avatar,
+      role: user.role,
       totalSaved: user.totalSaved,
       totalPortion: user.totalPortion,
     };
