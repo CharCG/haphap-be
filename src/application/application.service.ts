@@ -17,8 +17,20 @@ export class ApplicationService {
     return applications.map((a) => ({
       applicationId: a.id,
       userName: a.user.name,
+      userEmail: a.user.email,
+      userPhone: a.user.phone,
       merchantName: a.merchantName,
       status: a.status,
+      address: a.address,
+      latitude: a.latitude,
+      longitude: a.longitude,
+      description: a.description,
+      openTime: a.openTime,
+      closeTime: a.closeTime,
+      phone: a.phone,
+      categories: a.categories,
+      rejectNote: a.rejectNote,
+      reviewedAt: a.reviewedAt,
       createdAt: a.createdAt,
     }));
   }
