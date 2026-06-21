@@ -33,13 +33,13 @@ export class ApplicationController {
   async create(
     @CurrentUser() user: CurrentUserDto,
     @Body() dto: CreateApplicationDto,
-    @UploadedFiles() files: { avatar?: Express.Multer.File[]; document?: Express.Multer.File[] },
+    @UploadedFiles() files: { avatar: Express.Multer.File[]; document: Express.Multer.File[] },
   ) {
     if (!files?.document || files.document.length === 0) {
       throw new BadRequestException('Document file is required');
     }
 
-    return this.applicationService.create(user.id, dto, files.avatar?.[0], files.document[0]);
+    return this.applicationService.create(user.id, dto, files.avatar[0], files.document[0]);
   }
 
   @Get('me')

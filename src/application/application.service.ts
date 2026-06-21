@@ -12,7 +12,7 @@ export class ApplicationService {
     private readonly configService: ConfigService,
     private readonly prismaService: PrismaService,
     private readonly storageService: StorageService,
-  ) {}
+  ) { }
 
   async findAll() {
     const applications = await this.prismaService.application.findMany({
@@ -66,7 +66,7 @@ export class ApplicationService {
   async create(
     userId: string,
     dto: CreateApplicationDto,
-    avatarFile: Express.Multer.File | undefined,
+    avatarFile: Express.Multer.File,
     documentFile: Express.Multer.File,
   ) {
     const activeApps = await this.prismaService.application.findMany({
@@ -81,14 +81,10 @@ export class ApplicationService {
     }
 
     const avatarBucketName = this.configService.get<string>('SUPABASE_APPLICATION_AVATAR_BUCKET')!;
-    let avatarUrl: string | undefined = undefined;
-
-    if (avatarFile) {
-      avatarUrl = await this.storageService.uploadFile(avatarFile, avatarBucketName, userId);
-    }
+    const avatarUrl = await this.storageService.uploadFile(avatarFile, avatarBucketName, userId);
 
     const documentBucketName = this.configService.get<string>('SUPABASE_APPLICATION_DOCUMENT_BUCKET')!;
-    const documentUrl = await this.storageService.uploadFile(documentFile, documentBucketName, userId); 
+    const documentUrl = await this.storageService.uploadFile(documentFile, documentBucketName, userId);
 
     const application = await this.prismaService.application.create({
       data: {
