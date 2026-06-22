@@ -65,6 +65,7 @@ export class UserService {
       userId: updatedUser.id,
       name: updatedUser.name,
       email: updatedUser.email,
+      phone: updatedUser.phone,
       avatar: updatedUser.avatar,
       updatedAt: updatedUser.updatedAt,
     };

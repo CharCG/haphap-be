@@ -128,9 +128,11 @@ export class MerchantService {
     return {
       merchantId: updatedMerchant.id,
       merchantName: updatedMerchant.merchantName,
+      address: updatedMerchant.address,
       description: updatedMerchant.description,
       openTime: updatedMerchant.openTime,
       closeTime: updatedMerchant.closeTime,
+      phone: updatedMerchant.phone,
       avatar: updatedMerchant.avatar,
       categories: updatedMerchant.categories,
       updatedAt: updatedMerchant.updatedAt,

@@ -95,7 +95,7 @@ export class MenuService {
       data: {
         ...dto,
         merchantId,
-        image: imageUrl,
+        ...(imageUrl !== undefined && { image: imageUrl }),
       },
     });
 
@@ -105,7 +105,6 @@ export class MenuService {
       description: menuItem.description,
       image: menuItem.image,
       originalPrice: menuItem.originalPrice,
-      isActive: menuItem.isActive,
       createdAt: menuItem.createdAt,
     };
   }
@@ -124,7 +123,6 @@ export class MenuService {
       name: updatedMenuItem.name,
       description: updatedMenuItem.description,
       originalPrice: updatedMenuItem.originalPrice,
-      isActive: updatedMenuItem.isActive,
       updatedAt: updatedMenuItem.updatedAt,
     };
   }
@@ -144,27 +142,4 @@ export class MenuService {
       updatedAt: deletedMenuItem.updatedAt,
     };
   }
-
-  // async uploadImage(userId: string, menuItemId: string, file: Express.Multer.File) {
-  //   if (!file) {
-  //     throw new BadRequestException('File is required');
-  //   }
-
-  //   const merchantId = await this.getMerchantIdByUserId(userId);
-  //   await this.validateMenuOwner(menuItemId, merchantId);
-
-  //   const bucketName = this.configService.get<string>('SUPABASE_MENU_IMAGE_BUCKET')!;
-  //   const imageUrl = await this.storageService.uploadFile(file, bucketName, menuItemId);
-
-  //   const updatedMenuItem = await this.prismaService.menuItem.update({
-  //     where: { id: menuItemId },
-  //     data: { image: imageUrl },
-  //   });
-
-  //   return {
-  //     menuItemId: updatedMenuItem.id,
-  //     image: updatedMenuItem.image,
-  //     updatedAt: updatedMenuItem.updatedAt,
-  //   };
-  // }
 }

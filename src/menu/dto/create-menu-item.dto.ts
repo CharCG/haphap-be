@@ -13,10 +13,6 @@ export class CreateMenuItemDto {
   @IsString()
   description?: string;
 
-  @ApiProperty({ type: 'string', format: 'binary', required: false })
-  @IsOptional()
-  image?: any;
-
   @ApiProperty()
   @IsNotEmpty()
   @Type(() => Number)

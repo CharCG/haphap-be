@@ -1,6 +1,7 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderStatusDto, OrderActionStatus } from './dto/update-order-status.dto';
 import { CurrentUserDto } from '../common/dto/current-user.dto';
 import { Role, OrderStatus } from '../generated/prisma/enums';
 import { Prisma } from '../generated/prisma/client';
@@ -23,10 +24,15 @@ export class OrderService {
         });
 
         if (!surplusItem || !surplusItem.isActive) {
-          throw new BadRequestException(`Item ${item.surplusItemId} is not available`);
+          throw new BadRequestException(`Surplus item not found`);
         }
+
+        if (surplusItem.merchantId !== dto.merchantId) {
+          throw new ForbiddenException('Access denied');
+        }
+
         if (surplusItem.stock < item.quantity) {
-          throw new BadRequestException(`Insufficient stock for ${surplusItem.menuItem.name}`);
+          throw new BadRequestException(`Surplus item insufficient stock`);
         }
 
         await prisma.surplusItem.update({
@@ -57,9 +63,7 @@ export class OrderService {
           totalOriginal,
           notes: dto.notes,
           expiredAt,
-          orderItems: {
-            createMany: { data: orderItemsData },
-          },
+          orderItems: { createMany: { data: orderItemsData } },
         },
         include: { orderItems: true },
       });
@@ -69,7 +73,9 @@ export class OrderService {
 
     return {
       orderId: order.id,
+      status: order.status,
       totalAmount: order.totalAmount,
+      totalOriginal: order.totalOriginal,
       expiredAt: order.expiredAt,
       createdAt: order.createdAt,
     };
@@ -90,11 +96,11 @@ export class OrderService {
     }
 
     if (currentUser.role === Role.CUSTOMER && order.userId !== currentUser.id) {
-      throw new ForbiddenException('You are not authorized to view this order');
+      throw new ForbiddenException('Access denied');
     }
 
     if (currentUser.role === Role.MERCHANT && order.merchant.userId !== currentUser.id) {
-      throw new ForbiddenException('You are not authorized to view this order');
+      throw new ForbiddenException('Access denied');
     }
 
     return order;
@@ -117,7 +123,7 @@ export class OrderService {
     });
 
     if (!merchant) {
-      throw new NotFoundException('Merchant profile not found');
+      throw new NotFoundException('Merchant profile not found for this user');
     }
 
     return this.prismaService.order.findMany({
@@ -130,42 +136,62 @@ export class OrderService {
     });
   }
 
-  async acceptOrder(orderId: string, userId: string) {
+  async updateStatus(orderId: string, userId: string, dto: UpdateOrderStatusDto) {
     const order = await this.prismaService.order.findUnique({
       where: { id: orderId },
       include: { merchant: true },
     });
 
-    if (!order) throw new NotFoundException('Order not found');
-    if (order.merchant.userId !== userId) throw new ForbiddenException('You are not authorized');
-    if (order.status !== OrderStatus.PROCESSING) {
-      throw new BadRequestException('Order is not in a valid state to be accepted');
+    if (!order) {
+      throw new NotFoundException('Order not found');
     }
 
-    return this.prismaService.order.update({
-      where: { id: orderId },
-      data: { status: OrderStatus.READY },
-      include: { orderItems: true },
-    });
-  }
-
-  async rejectOrder(orderId: string, userId: string) {
-    const order = await this.prismaService.order.findUnique({
-      where: { id: orderId },
-      include: { merchant: true },
-    });
-
-    if (!order) throw new NotFoundException('Order not found');
-    if (order.merchant.userId !== userId) throw new ForbiddenException('You are not authorized');
-    if (order.status !== OrderStatus.PROCESSING) {
-      throw new BadRequestException('Order is not in a valid state to be rejected');
+    if (order.merchant.userId !== userId) {
+      throw new ForbiddenException('Access denied');
     }
 
-    return this.prismaService.order.update({
-      where: { id: orderId },
-      data: { status: OrderStatus.CANCELLED },
-      include: { orderItems: true },
-    });
+    let updatedOrder;
+
+    if (dto.status === OrderActionStatus.ACCEPT) {
+      if (order.status !== OrderStatus.PROCESSING) {
+        throw new BadRequestException(`Order is already ${order.status}`);
+      }
+      
+      updatedOrder = await this.prismaService.order.update({
+        where: { id: orderId },
+        data: { status: OrderStatus.READY },
+        include: { orderItems: true },
+      });
+    } else if (dto.status === OrderActionStatus.REJECT) {
+      if (order.status !== OrderStatus.PROCESSING) {
+        throw new BadRequestException(`Order is already ${order.status}`);
+      }
+
+      updatedOrder = await this.prismaService.order.update({
+        where: { id: orderId },
+        data: { status: OrderStatus.CANCELLED },
+        include: { orderItems: true },
+      });
+    }
+
+    if (dto.status === OrderActionStatus.READY) {
+      if (order.status !== OrderStatus.READY) {
+        throw new BadRequestException(`Order is already ${order.status}`);
+      }
+
+      if (order.qrCode) {
+        throw new BadRequestException('QR code already exists');
+      }
+
+      const qrCode = await QrCodeUtil.generateToken(orderId);
+      updatedOrder = await this.prismaService.order.update({
+        where: { id: orderId },
+        data: { qrCode },
+        include: { orderItems: true },
+      });
+    }
+
+    return updatedOrder;
   }
 
   async scanOrder(orderId: string, userId: string, qrCode: string) {
@@ -179,15 +205,15 @@ export class OrderService {
     }
 
     if (order.merchant.userId !== userId) {
-      throw new ForbiddenException('You are not authorized to scan this order');
+      throw new ForbiddenException('Access denied');
     }
 
     if (order.status !== OrderStatus.READY) {
-      throw new BadRequestException('Order is not in a valid state to be scanned');
+      throw new BadRequestException(`Order is already ${order.status}`);
     }
 
     if (!QrCodeUtil.validateToken(qrCode, orderId)) {
-      throw new BadRequestException('Invalid QR code');
+      throw new BadRequestException('QR code not found');
     }
 
     const totalQuantity = order.orderItems.reduce((sum, item) => sum + item.quantity, 0);
@@ -201,6 +227,15 @@ export class OrderService {
         },
         include: { orderItems: true },
       }),
+
+      this.prismaService.user.update({
+        where: { id: order.userId },
+        data: {
+          totalSaved: { increment: order.totalOriginal - order.totalAmount },
+          totalPortion: { increment: totalQuantity },
+        },
+      }),
+
       this.prismaService.merchant.update({
         where: { id: order.merchantId },
         data: {
@@ -211,26 +246,5 @@ export class OrderService {
     ]);
 
     return updatedOrder;
-  }
-
-  async readyOrder(orderId: string, userId: string) {
-    const order = await this.prismaService.order.findUnique({
-      where: { id: orderId },
-      include: { merchant: true },
-    });
-
-    if (!order) throw new NotFoundException('Order not found');
-    if (order.merchant.userId !== userId) throw new ForbiddenException('You are not authorized');
-    if (order.status !== OrderStatus.READY) {
-      throw new BadRequestException('Order is not in a valid state to be marked ready');
-    }
-
-    const qrCode = await QrCodeUtil.generateToken(orderId);
-
-    return this.prismaService.order.update({
-      where: { id: orderId },
-      data: { qrCode },
-      include: { orderItems: true },
-    });
   }
 }
