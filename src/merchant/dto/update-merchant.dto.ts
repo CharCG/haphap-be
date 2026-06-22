@@ -6,6 +6,21 @@ export class UpdateMerchantDto {
   @ApiProperty()
   @IsOptional()
   @IsString()
+  merchantName?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  address?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  phone?: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
   description?: string;
 
   @ApiProperty()
