@@ -29,6 +29,7 @@ export class UserService {
       email: user.email,
       phone: user.phone,
       avatar: user.avatar,
+      role: user.role,
       totalSaved: user.totalSaved,
       totalPortion: user.totalPortion,
     };
