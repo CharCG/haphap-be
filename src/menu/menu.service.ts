@@ -1,4 +1,4 @@
-import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../common/storage/storage.service';
@@ -81,13 +81,21 @@ export class MenuService {
     };
   }
 
-  async create(userId: string, dto: CreateMenuItemDto) {
+  async create(userId: string, dto: CreateMenuItemDto, imageFile?: Express.Multer.File) {
     const merchantId = await this.getMerchantIdByUserId(userId);
+
+    let imageUrl: string | undefined = undefined;
+
+    if (imageFile) {
+      const bucketName = this.configService.get<string>('SUPABASE_MENU_IMAGE_BUCKET')!;
+      imageUrl = await this.storageService.uploadFile(imageFile, bucketName, merchantId);
+    }
 
     const menuItem = await this.prismaService.menuItem.create({
       data: {
         ...dto,
         merchantId,
+        image: imageUrl,
       },
     });
 
@@ -95,6 +103,7 @@ export class MenuService {
       menuItemId: menuItem.id,
       name: menuItem.name,
       description: menuItem.description,
+      image: menuItem.image,
       originalPrice: menuItem.originalPrice,
       isActive: menuItem.isActive,
       createdAt: menuItem.createdAt,
@@ -136,26 +145,26 @@ export class MenuService {
     };
   }
 
-  async uploadImage(userId: string, menuItemId: string, file: Express.Multer.File) {
-    if (!file) {
-      throw new BadRequestException('File is required');
-    }
+  // async uploadImage(userId: string, menuItemId: string, file: Express.Multer.File) {
+  //   if (!file) {
+  //     throw new BadRequestException('File is required');
+  //   }
 
-    const merchantId = await this.getMerchantIdByUserId(userId);
-    await this.validateMenuOwner(menuItemId, merchantId);
+  //   const merchantId = await this.getMerchantIdByUserId(userId);
+  //   await this.validateMenuOwner(menuItemId, merchantId);
 
-    const bucketName = this.configService.get<string>('SUPABASE_MENU_BUCKET')!;
-    const imageUrl = await this.storageService.uploadFile(file, bucketName, menuItemId);
+  //   const bucketName = this.configService.get<string>('SUPABASE_MENU_IMAGE_BUCKET')!;
+  //   const imageUrl = await this.storageService.uploadFile(file, bucketName, menuItemId);
 
-    const updatedMenuItem = await this.prismaService.menuItem.update({
-      where: { id: menuItemId },
-      data: { image: imageUrl },
-    });
+  //   const updatedMenuItem = await this.prismaService.menuItem.update({
+  //     where: { id: menuItemId },
+  //     data: { image: imageUrl },
+  //   });
 
-    return {
-      menuItemId: updatedMenuItem.id,
-      image: updatedMenuItem.image,
-      updatedAt: updatedMenuItem.updatedAt,
-    };
-  }
+  //   return {
+  //     menuItemId: updatedMenuItem.id,
+  //     image: updatedMenuItem.image,
+  //     updatedAt: updatedMenuItem.updatedAt,
+  //   };
+  // }
 }

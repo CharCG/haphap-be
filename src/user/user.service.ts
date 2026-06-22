@@ -12,7 +12,7 @@ export class UserService {
     private readonly prismaService: PrismaService,
     private readonly storageService: StorageService,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   async getMe(userId: string) {
     const user = await this.prismaService.user.findUnique({
@@ -29,12 +29,13 @@ export class UserService {
       email: user.email,
       phone: user.phone,
       avatar: user.avatar,
+      role: user.role,
       totalSaved: user.totalSaved,
       totalPortion: user.totalPortion,
     };
   }
 
-  async updateMe(userId: string, dto: UpdateUserDto) {
+  async updateMe(userId: string, dto: UpdateUserDto, avatarFile?: Express.Multer.File) {
     if (dto.email) {
       const existingUser = await this.prismaService.user.findUnique({
         where: { email: dto.email },
@@ -45,15 +46,26 @@ export class UserService {
       }
     }
 
+    let avatarUrl: string | undefined = undefined;
+
+    if (avatarFile) {
+      const bucketName = this.configService.get<string>('SUPABASE_USER_AVATAR_BUCKET')!;
+      avatarUrl = await this.storageService.uploadFile(avatarFile, bucketName, userId);
+    }
+
     const updatedUser = await this.prismaService.user.update({
       where: { id: userId },
-      data: dto,
+      data: {
+        ...dto,
+        ...(avatarUrl !== undefined && { avatar: avatarUrl }),
+      },
     });
 
     return {
       userId: updatedUser.id,
       name: updatedUser.name,
       email: updatedUser.email,
+      avatar: updatedUser.avatar,
       updatedAt: updatedUser.updatedAt,
     };
   }
@@ -82,26 +94,6 @@ export class UserService {
 
     return {
       userId: updatedUser.id,
-      updatedAt: updatedUser.updatedAt,
-    };
-  }
-
-  async uploadAvatar(userId: string, file: Express.Multer.File) {
-    if (!file) {
-      throw new BadRequestException('File is required');
-    }
-
-    const bucketName = this.configService.get<string>('SUPABASE_USER_BUCKET')!;
-    const avatarUrl = await this.storageService.uploadFile(file, bucketName, userId);
-
-    const updatedUser = await this.prismaService.user.update({
-      where: { id: userId },
-      data: { avatar: avatarUrl },
-    });
-
-    return {
-      userId: updatedUser.id,
-      avatar: updatedUser.avatar,
       updatedAt: updatedUser.updatedAt,
     };
   }

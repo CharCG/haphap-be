@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UseGuards,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MenuService } from './menu.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -9,14 +20,14 @@ import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { CurrentUserDto } from '../common/dto/current-user.dto';
 import { CreateMenuItemDto } from './dto/create-menu-item.dto';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 
 @ApiBearerAuth()
 @Controller('menus')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles(Role.MERCHANT)
 export class MenuController {
-  constructor(private readonly menuService: MenuService) { }
+  constructor(private readonly menuService: MenuService) {}
 
   @Get()
   async findAll(@CurrentUser() user: CurrentUserDto) {
@@ -24,8 +35,14 @@ export class MenuController {
   }
 
   @Post()
-  async create(@CurrentUser() user: CurrentUserDto, @Body() dto: CreateMenuItemDto) {
-    return this.menuService.create(user.id, dto);
+  @UseInterceptors(FileInterceptor('image'))
+  @ApiConsumes('multipart/form-data')
+  async create(
+    @CurrentUser() user: CurrentUserDto,
+    @Body() dto: CreateMenuItemDto,
+    @UploadedFile() image?: Express.Multer.File,
+  ) {
+    return this.menuService.create(user.id, dto, image);
   }
 
   @Get(':menuItemId')
@@ -47,13 +64,14 @@ export class MenuController {
     return this.menuService.remove(user.id, menuItemId);
   }
 
-  @Post(':menuItemId/image')
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadImage(
-    @CurrentUser() user: CurrentUserDto,
-    @Param('menuItemId') menuItemId: string,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    return this.menuService.uploadImage(user.id, menuItemId, file);
-  }
+  // @Post(':menuItemId/image')
+  // @UseInterceptors(FileInterceptor('file'))
+  // @ApiConsumes('multipart/form-data')
+  // async uploadImage(
+  //   @CurrentUser() user: CurrentUserDto,
+  //   @Param('menuItemId') menuItemId: string,
+  //   @UploadedFile() file: Express.Multer.File,
+  // ) {
+  //   return this.menuService.uploadImage(user.id, menuItemId, file);
+  // }
 }

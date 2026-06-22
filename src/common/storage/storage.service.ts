@@ -26,7 +26,8 @@ export class StorageService {
     });
 
     if (error) {
-      throw new InternalServerErrorException('Internal server error');
+      console.error('Supabase upload error:', error);
+      throw new InternalServerErrorException(`Supabase upload error: ${error.message}`);
     }
 
     const { data: publicUrlData } = this.supabaseClient.storage.from(bucketName).getPublicUrl(filePath);
