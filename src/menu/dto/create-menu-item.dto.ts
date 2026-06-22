@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import { IsInt, IsNotEmpty, IsOptional, IsString, Min } from 'class-validator';
 
 export class CreateMenuItemDto {
@@ -12,8 +13,13 @@ export class CreateMenuItemDto {
   @IsString()
   description?: string;
 
+  @ApiProperty({ type: 'string', format: 'binary', required: false })
+  @IsOptional()
+  image?: any;
+
   @ApiProperty()
   @IsNotEmpty()
+  @Type(() => Number)
   @IsInt()
   @Min(1)
   originalPrice!: number;

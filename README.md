@@ -168,7 +168,6 @@ All endpoints return responses using the following standardized format:
 | `GET`    | `/menus/:menuItemId`       | MERCHANT | \*          |
 | `PATCH`  | `/menus/:menuItemId`       | MERCHANT | \*          |
 | `DELETE` | `/menus/:menuItemId`       | MERCHANT | \*          |
-| `POST`   | `/menus/:menuItemId/image` | MERCHANT | \*          |
 
 ### Surplus (`/surplus`)
 

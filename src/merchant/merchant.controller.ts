@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Param, Patch, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { MerchantService } from './merchant.service';
 import { JwtAuthGuard } from '../../src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../../src/auth/guards/roles.guard';
@@ -8,7 +9,7 @@ import { CurrentUser } from '../../src/common/decorators/current-user.decorator'
 import { CurrentUserDto } from '../../src/common/dto/current-user.dto';
 import { GetMerchantsQueryDto } from './dto/get-merchants-query.dto';
 import { UpdateMerchantDto } from './dto/update-merchant.dto';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 
 @Controller('merchants')
 export class MerchantController {
@@ -31,8 +32,14 @@ export class MerchantController {
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.MERCHANT)
   @Patch('me')
-  async updateMe(@CurrentUser() user: CurrentUserDto, @Body() dto: UpdateMerchantDto) {
-    return this.merchantService.updateMe(user.id, dto);
+  @UseInterceptors(FileInterceptor('avatar'))
+  @ApiConsumes('multipart/form-data')
+  async updateMe(
+    @CurrentUser() user: CurrentUserDto,
+    @Body() dto: UpdateMerchantDto,
+    @UploadedFile() avatar?: Express.Multer.File,
+  ) {
+    return this.merchantService.updateMe(user.id, dto, avatar);
   }
 
   @Get(':merchantId')

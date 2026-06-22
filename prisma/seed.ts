@@ -33,7 +33,7 @@ async function main() {
     },
   });
 
-  const customerSiti = await prisma.user.create({
+  const userCustomerSiti = await prisma.user.create({
     data: {
       email: 'siti@haphap.com',
       name: 'Siti Aminah',
@@ -45,7 +45,7 @@ async function main() {
     },
   });
 
-  const customerAgus = await prisma.user.create({
+  const userCustomerAgus = await prisma.user.create({
     data: {
       email: 'agus@haphap.com',
       name: 'Agus Pratama',
@@ -71,7 +71,7 @@ async function main() {
       name: 'Bambang Pamungkas',
       password: hashedPassword,
       phone: '081244444444',
-      role: 'MERCHANT',
+      role: 'CUSTOMER',
     },
   });
 
@@ -81,7 +81,7 @@ async function main() {
       name: 'Citra Kirana',
       password: hashedPassword,
       phone: '081255555555',
-      role: 'MERCHANT',
+      role: 'CUSTOMER',
     },
   });
 
@@ -89,6 +89,7 @@ async function main() {
     data: {
       userId: userMerchantBambang.id,
       merchantName: 'Warung Nasi Bambang',
+      merchantOwner: 'Bambang Pamungkas',
       status: 'PENDING',
       address: 'Jl. Merdeka No. 10, Jakarta',
       latitude: -6.2,
@@ -98,6 +99,11 @@ async function main() {
       closeTime: '20:00',
       phone: '081244444444',
       categories: ['RESTORAN'],
+      bankType: 'BCA',
+      bankAccount: '1234567890',
+      bankHolder: 'Bambang Pamungkas',
+      document: 'https://example.com/doc_bambang.pdf',
+      avatar: 'https://api.dicebear.com/9.x/adventurer/png?seed=bambang',
     },
   });
 
@@ -105,6 +111,7 @@ async function main() {
     data: {
       userId: userMerchantCitra.id,
       merchantName: 'Toko Kue Citra',
+      merchantOwner: 'Citra Kirana',
       status: 'REJECTED',
       address: 'Jl. Sudirman No. 5, Jakarta',
       latitude: -6.225014,
@@ -114,6 +121,11 @@ async function main() {
       closeTime: '17:00',
       phone: '081255555555',
       categories: ['ROTI', 'PENUTUP'],
+      bankType: 'MANDIRI',
+      bankAccount: '0987654321',
+      bankHolder: 'Citra Kirana',
+      document: 'https://example.com/doc_citra.pdf',
+      avatar: 'https://api.dicebear.com/9.x/adventurer/png?seed=citra',
       rejectNote: 'Foto KTP buram dan tidak terbaca jelas.',
       reviewedAt: new Date(),
     },
@@ -123,6 +135,7 @@ async function main() {
     data: {
       userId: userMerchantAyu.id,
       merchantName: 'Kedai Kopi Bu Ayu',
+      merchantOwner: 'Ayu Lestari',
       status: 'APPROVED',
       address: 'Jl. Diponegoro No. 15, Bandung',
       latitude: -6.903444,
@@ -132,6 +145,11 @@ async function main() {
       closeTime: '22:00',
       phone: '081233333333',
       categories: ['KAFE', 'JAJANAN'],
+      bankType: 'BRI',
+      bankAccount: '1122334455',
+      bankHolder: 'Ayu Lestari',
+      document: 'https://example.com/doc_ayu.pdf',
+      avatar: 'https://api.dicebear.com/9.x/adventurer/png?seed=ayu',
       reviewedAt: new Date(),
     },
   });
@@ -147,6 +165,7 @@ async function main() {
       openTime: '10:00',
       closeTime: '22:00',
       phone: '081233333333',
+      avatar: 'https://api.dicebear.com/9.x/adventurer/png?seed=ayu',
       categories: ['KAFE', 'JAJANAN'],
       rating: 4.5,
       totalRevenue: 65000,
@@ -229,7 +248,7 @@ async function main() {
 
   const orderPending = await prisma.order.create({
     data: {
-      userId: customerSiti.id,
+      userId: userCustomerSiti.id,
       merchantId: merchantAyu.id,
       status: 'PENDING',
       totalAmount: 10000,
@@ -262,7 +281,7 @@ async function main() {
 
   const orderProcessing = await prisma.order.create({
     data: {
-      userId: customerAgus.id,
+      userId: userCustomerAgus.id,
       merchantId: merchantAyu.id,
       status: 'PROCESSING',
       totalAmount: 22000,
@@ -303,7 +322,7 @@ async function main() {
 
   const orderCompleted = await prisma.order.create({
     data: {
-      userId: customerSiti.id,
+      userId: userCustomerSiti.id,
       merchantId: merchantAyu.id,
       status: 'COMPLETED',
       totalAmount: 32000,
@@ -344,7 +363,7 @@ async function main() {
 
   await prisma.review.create({
     data: {
-      userId: customerSiti.id,
+      userId: userCustomerSiti.id,
       merchantId: merchantAyu.id,
       orderId: orderCompleted.id,
       rating: 5,
@@ -354,7 +373,7 @@ async function main() {
 
   const orderCancelledExpired = await prisma.order.create({
     data: {
-      userId: customerAgus.id,
+      userId: userCustomerAgus.id,
       merchantId: merchantAyu.id,
       status: 'CANCELLED',
       totalAmount: 12000,
@@ -386,7 +405,7 @@ async function main() {
 
   const orderCancelledFailed = await prisma.order.create({
     data: {
-      userId: customerSiti.id,
+      userId: userCustomerSiti.id,
       merchantId: merchantAyu.id,
       status: 'CANCELLED',
       totalAmount: 20000,

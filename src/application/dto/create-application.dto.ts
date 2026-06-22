@@ -1,5 +1,6 @@
 import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Matches } from 'class-validator';
-import { MerchantCategory } from '../../generated/prisma/enums';
+import { Type, Transform } from 'class-transformer';
+import { BankType, MerchantCategory } from '../../generated/prisma/enums';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateApplicationDto {
@@ -11,15 +12,22 @@ export class CreateApplicationDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
+  merchantOwner!: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
   address!: string;
 
   @ApiProperty()
   @IsNotEmpty()
+  @Type(() => Number)
   @IsNumber()
   latitude!: number;
 
   @ApiProperty()
   @IsNotEmpty()
+  @Type(() => Number)
   @IsNumber()
   longitude!: number;
 
@@ -43,7 +51,24 @@ export class CreateApplicationDto {
   phone!: string;
 
   @ApiProperty({ enum: MerchantCategory, isArray: true })
+  @IsNotEmpty()
+  @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
   @IsArray()
   @IsEnum(MerchantCategory, { each: true })
   categories!: MerchantCategory[];
+
+  @ApiProperty({ enum: BankType })
+  @IsNotEmpty()
+  @IsEnum(BankType)
+  bankType!: BankType;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  bankAccount!: string;
+
+  @ApiProperty()
+  @IsNotEmpty()
+  @IsString()
+  bankHolder!: string;
 }

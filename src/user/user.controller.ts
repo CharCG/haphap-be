@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, UseGuards, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Body, Controller, Get, Patch, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '../../src/auth/guards/jwt-auth.guard';
@@ -9,7 +9,7 @@ import { CurrentUser } from '../../src/common/decorators/current-user.decorator'
 import { CurrentUserDto } from '../../src/common/dto/current-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 
 @ApiBearerAuth()
 @Controller('users')
@@ -24,21 +24,18 @@ export class UserController {
   }
 
   @Patch('me')
-  async updateMe(@CurrentUser() user: CurrentUserDto, @Body() dto: UpdateUserDto) {
-    return this.userService.updateMe(user.id, dto);
+  @UseInterceptors(FileInterceptor('avatar'))
+  @ApiConsumes('multipart/form-data')
+  async updateMe(
+    @CurrentUser() user: CurrentUserDto,
+    @Body() dto: UpdateUserDto,
+    @UploadedFile() avatar?: Express.Multer.File,
+  ) {
+    return this.userService.updateMe(user.id, dto, avatar);
   }
 
   @Patch('me/password')
   async updateMyPassword(@CurrentUser() user: CurrentUserDto, @Body() dto: UpdatePasswordDto) {
     return this.userService.updateMyPassword(user.id, dto);
-  }
-
-  @Post('me/avatar')
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadAvatar(
-    @CurrentUser() user: CurrentUserDto,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    return this.userService.uploadAvatar(user.id, file);
   }
 }

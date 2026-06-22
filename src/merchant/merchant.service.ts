@@ -1,11 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../src/prisma/prisma.service';
+import { StorageService } from '../common/storage/storage.service';
 import { GetMerchantsQueryDto } from './dto/get-merchants-query.dto';
 import { UpdateMerchantDto } from './dto/update-merchant.dto';
 
 @Injectable()
 export class MerchantService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly storageService: StorageService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async findAll(dto: GetMerchantsQueryDto) {
     const merchants = await this.prismaService.merchant.findMany({
@@ -95,7 +101,7 @@ export class MerchantService {
     };
   }
 
-  async updateMe(userId: string, dto: UpdateMerchantDto) {
+  async updateMe(userId: string, dto: UpdateMerchantDto, avatarFile?: Express.Multer.File) {
     const merchant = await this.prismaService.merchant.findUnique({
       where: { userId },
     });
@@ -104,13 +110,24 @@ export class MerchantService {
       throw new NotFoundException('Merchant profile not found for this user');
     }
 
+    let avatarUrl: string | undefined = undefined;
+
+    if (avatarFile) {
+      const bucketName = this.configService.get<string>('SUPABASE_MERCHANT_AVATAR_BUCKET')!;
+      avatarUrl = await this.storageService.uploadFile(avatarFile, bucketName, merchant.id);
+    }
+
     const updatedMerchant = await this.prismaService.merchant.update({
       where: { userId },
-      data: dto,
+      data: {
+        ...dto,
+        ...(avatarUrl !== undefined && { avatar: avatarUrl }),
+      },
     });
 
     return {
       merchantId: updatedMerchant.id,
+      merchantName: updatedMerchant.merchantName,
       description: updatedMerchant.description,
       openTime: updatedMerchant.openTime,
       closeTime: updatedMerchant.closeTime,
