@@ -1,4 +1,15 @@
-import { BadRequestException, Body, Controller, Get, Param, Patch, Post, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UploadedFiles,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ApplicationService } from './application.service';
 import { JwtAuthGuard } from '../../src/auth/guards/jwt-auth.guard';
@@ -15,7 +26,7 @@ import { ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 @Controller('applications')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ApplicationController {
-  constructor(private readonly applicationService: ApplicationService) { }
+  constructor(private readonly applicationService: ApplicationService) {}
 
   @Get()
   @Roles(Role.ADMIN)
@@ -25,16 +36,22 @@ export class ApplicationController {
 
   @Post()
   @Roles(Role.CUSTOMER)
-  @UseInterceptors(FileFieldsInterceptor([
-    { name: 'avatar', maxCount: 1 },
-    { name: 'document', maxCount: 1 },
-  ]))
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'avatar', maxCount: 1 },
+      { name: 'document', maxCount: 1 },
+    ]),
+  )
   @ApiConsumes('multipart/form-data')
   async create(
     @CurrentUser() user: CurrentUserDto,
     @Body() dto: CreateApplicationDto,
     @UploadedFiles() files: { avatar: Express.Multer.File[]; document: Express.Multer.File[] },
   ) {
+    if (!files?.avatar || files.avatar.length === 0) {
+      throw new BadRequestException('Avatar file is required');
+    }
+
     if (!files?.document || files.document.length === 0) {
       throw new BadRequestException('Document file is required');
     }

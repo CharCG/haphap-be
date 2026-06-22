@@ -1,4 +1,5 @@
 import { IsArray, IsEnum, IsOptional, IsString, Matches } from 'class-validator';
+import { Transform } from 'class-transformer';
 import { MerchantCategory } from '../../generated/prisma/enums';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -12,11 +13,6 @@ export class UpdateMerchantDto {
   @IsOptional()
   @IsString()
   address?: string;
-
-  @ApiProperty()
-  @IsOptional()
-  @IsString()
-  phone?: string;
 
   @ApiProperty()
   @IsOptional()
@@ -36,10 +32,11 @@ export class UpdateMerchantDto {
   @ApiProperty()
   @IsOptional()
   @IsString()
-  avatar?: string;
+  phone?: string;
 
   @ApiProperty({ enum: MerchantCategory, isArray: true })
   @IsOptional()
+  @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
   @IsArray()
   @IsEnum(MerchantCategory, { each: true })
   categories?: MerchantCategory[];

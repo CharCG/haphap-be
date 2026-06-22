@@ -94,8 +94,8 @@ model Application {
   latitude      Float
   longitude     Float
   description   String?
-  openTime      String
-  closeTime     String
+  openTime      String // "HH:mm"
+  closeTime     String // "HH:mm"
   phone         String
   avatar        String
   categories    MerchantCategory[]

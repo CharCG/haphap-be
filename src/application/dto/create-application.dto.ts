@@ -50,11 +50,8 @@ export class CreateApplicationDto {
   @IsString()
   phone!: string;
 
-  @ApiProperty({ type: 'string', format: 'binary', required: false })
-  @IsOptional()
-  avatar?: any;
-
   @ApiProperty({ enum: MerchantCategory, isArray: true })
+  @IsNotEmpty()
   @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
   @IsArray()
   @IsEnum(MerchantCategory, { each: true })
@@ -74,8 +71,4 @@ export class CreateApplicationDto {
   @IsNotEmpty()
   @IsString()
   bankHolder!: string;
-
-  @ApiProperty({ type: 'string', format: 'binary' })
-  @IsOptional()
-  document!: any;
 }
