@@ -2,6 +2,7 @@ import { Controller, Post, Body, UseGuards, Get, Param, Patch } from '@nestjs/co
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { ScanOrderDto } from './dto/scan-order.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -17,13 +18,13 @@ export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   @Post()
-  @Roles(Role.CUSTOMER)
+  @Roles(Role.CUSTOMER, Role.MERCHANT)
   async create(@CurrentUser() user: CurrentUserDto, @Body() dto: CreateOrderDto) {
     return await this.orderService.create(user.id, dto);
   }
 
   @Get('me')
-  @Roles(Role.CUSTOMER)
+  @Roles(Role.CUSTOMER, Role.MERCHANT)
   async findOrderMe(@CurrentUser() user: CurrentUserDto) {
     return await this.orderService.findOrderMe(user.id);
   }
@@ -39,28 +40,24 @@ export class OrderController {
   async findOrderById(@Param('orderId') orderId: string, @CurrentUser() user: CurrentUserDto) {
     return await this.orderService.findOrderById(orderId, user);
   }
-  
-  @Patch(':orderId/accept')
-  @Roles(Role.MERCHANT)
-  async acceptOrder(@Param('orderId') orderId: string, @CurrentUser() currentUser: CurrentUserDto) {
-    return await this.orderService.acceptOrder(orderId, currentUser.id);
-  }
 
-  @Patch(':orderId/reject')
+  @Patch(':orderId/status')
   @Roles(Role.MERCHANT)
-  async rejectOrder(@Param('orderId') orderId: string, @CurrentUser() currentUser: CurrentUserDto) {
-    return await this.orderService.rejectOrder(orderId, currentUser.id);
+  async updateStatus(
+    @Param('orderId') orderId: string,
+    @CurrentUser() currentUser: CurrentUserDto,
+    @Body() dto: UpdateOrderStatusDto,
+  ) {
+    return await this.orderService.updateStatus(orderId, currentUser.id, dto);
   }
 
   @Patch(':orderId/scan')
   @Roles(Role.MERCHANT)
-  async scanOrder(@Param('orderId') orderId: string, @CurrentUser() currentUser: CurrentUserDto, @Body() dto: ScanOrderDto) {
+  async scanOrder(
+    @Param('orderId') orderId: string,
+    @CurrentUser() currentUser: CurrentUserDto,
+    @Body() dto: ScanOrderDto,
+  ) {
     return await this.orderService.scanOrder(orderId, currentUser.id, dto.qrCode);
   }
-
-  @Patch(':orderId/ready')
-  @Roles(Role.MERCHANT)
-  async readyOrder(@Param('orderId') orderId: string, @CurrentUser() currentUser: CurrentUserDto) {
-    return await this.orderService.readyOrder(orderId, currentUser.id);
-  }
-}
+}

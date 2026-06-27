@@ -65,7 +65,7 @@ export class ApplicationController {
     return this.applicationService.findMyApplications(user.id);
   }
 
-  @Patch(':applicationId')
+  @Patch(':applicationId/status')
   @Roles(Role.ADMIN)
   async updateStatus(@Param('applicationId') applicationId: string, @Body() dto: UpdateApplicationDto) {
     return this.applicationService.updateStatus(applicationId, dto);

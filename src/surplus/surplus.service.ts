@@ -88,14 +88,9 @@ export class SurplusService {
 
     return {
       surplusItemId: surplusItem.id,
-      name: surplusItem.menuItem.name,
-      description: surplusItem.menuItem.description,
-      image: surplusItem.menuItem.image,
+      menuItemId: surplusItem.menuItemId,
       discountPrice: surplusItem.discountPrice,
-      originalPrice: surplusItem.originalPrice,
       stock: surplusItem.stock,
-      isActive: surplusItem.isActive,
-      date: surplusItem.date,
       createdAt: surplusItem.createdAt,
     };
   }
