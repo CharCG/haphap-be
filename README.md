@@ -76,8 +76,11 @@ GOOGLE_CALLBACK_URL=
 
 SUPABASE_URL=
 SUPABASE_KEY=
-SUPABASE_USER_BUCKET=
-SUPABASE_MENU_BUCKET=M
+SUPABASE_USER_AVATAR_BUCKET=
+SUPABASE_MENU_IMAGE_BUCKET=
+SUPABASE_APPLICATION_AVATAR_BUCKET=
+SUPABASE_APPLICATION_DOCUMENT_BUCKET=
+SUPABASE_MERCHANT_AVATAR_BUCKET=
 
 MIDTRANS_SERVER_KEY=
 MIDTRANS_CLIENT_KEY=
@@ -97,15 +100,16 @@ npm run start:prod
 
 ## Tech Stack
 
-| Layer     | Technology            | Version | Description |
-| --------- | --------------------- | ------- | ----------- |
-| Runtime   | Node.js               | 16.x    | \*          |
-| Framework | NestJS                | 11.x    | \*          |
-| Language  | TypeScript            | 5.x     | \*          |
-| ORM       | Prisma                | 7.x     | \*          |
-| Database  | PostgreSQL (Supabase) | 16.x    | \*          |
-| Storage   | Supabase Storage      | -       | \*          |
-| Payments  | Midtrans              | -       | \*          |
+| Layer          | Technology            | Version |
+| -------------- | --------------------- | ------- |
+| Runtime        | Node.js               | 16.x    |
+| Framework      | NestJS                | 11.x    |
+| Language       | TypeScript            | 5.x     |
+| ORM            | Prisma                | 7.x     |
+| Database       | PostgreSQL (Supabase) | 16.x    |
+| Object Storage | Supabase Storage      | -       |
+| Payments       | Midtrans              | -       |
+| Documentation  | Swagger               | -       |
 
 ###
 
@@ -126,86 +130,82 @@ All endpoints return responses using the following standardized format:
 
 ### Auth (`/auth`)
 
-| Method | Endpoint         | Access | Description |
-| ------ | ---------------- | ------ | ----------- |
-| `POST` | `/auth/register` | PUBLIC | \*          |
-| `POST` | `/auth/login`    | PUBLIC | \*          |
-| `POST` | `/auth/google`   | PUBLIC | \*          |
+| Method | Endpoint         | Access |
+| ------ | ---------------- | ------ |
+| `POST` | `/auth/register` | PUBLIC |
+| `POST` | `/auth/login`    | PUBLIC |
+| `POST` | `/auth/google`   | PUBLIC |
 
 ### Users (`/users`)
 
-| Method  | Endpoint             | Access             | Description |
-| ------- | -------------------- | ------------------ | ----------- |
-| `GET`   | `/users/me`          | CUSTOMER, MERCHANT | \*          |
-| `PATCH` | `/users/me`          | CUSTOMER, MERCHANT | \*          |
-| `PATCH` | `/users/me/password` | CUSTOMER, MERCHANT | \*          |
-| `POST`  | `/users/me/avatar`   | CUSTOMER, MERCHANT | \*          |
+| Method  | Endpoint             | Access             |
+| ------- | -------------------- | ------------------ |
+| `GET`   | `/users/me`          | CUSTOMER, MERCHANT |
+| `PATCH` | `/users/me`          | CUSTOMER, MERCHANT |
+| `PATCH` | `/users/me/password` | CUSTOMER, MERCHANT |
 
 ### Applications (`/applications`)
 
-| Method  | Endpoint                       | Access   | Description |
-| ------- | ------------------------------ | -------- | ----------- |
-| `GET`   | `/applications`                | ADMIN    | \*          |
-| `POST`  | `/applications`                | CUSTOMER | \*          |
-| `GET`   | `/applications/me`             | CUSTOMER | \*          |
-| `PATCH` | `/applications/:applicationId` | ADMIN    | \*          |
+| Method  | Endpoint                              | Access   |
+| ------- | ------------------------------------- | -------- |
+| `GET`   | `/applications`                       | ADMIN    |
+| `POST`  | `/applications`                       | CUSTOMER |
+| `GET`   | `/applications/me`                    | CUSTOMER |
+| `PATCH` | `/applications/:applicationId/status` | ADMIN    |
 
 ### Merchants (`/merchants`)
 
-| Method  | Endpoint                 | Access   | Description |
-| ------- | ------------------------ | -------- | ----------- |
-| `GET`   | `/merchants`             | PUBLIC   | \*          |
-| `GET`   | `/merchants/me`          | MERCHANT | \*          |
-| `PATCH` | `/merchants/me`          | MERCHANT | \*          |
-| `GET`   | `/merchants/:merchantId` | PUBLIC   | \*          |
+| Method  | Endpoint                 | Access   |
+| ------- | ------------------------ | -------- |
+| `GET`   | `/merchants`             | PUBLIC   |
+| `GET`   | `/merchants/me`          | MERCHANT |
+| `PATCH` | `/merchants/me`          | MERCHANT |
+| `GET`   | `/merchants/:merchantId` | PUBLIC   |
 
 ### Menus (`/menus`)
 
-| Method   | Endpoint                   | Access   | Description |
-| -------- | -------------------------- | -------- | ----------- |
-| `GET`    | `/menus`                   | MERCHANT | \*          |
-| `POST`   | `/menus`                   | MERCHANT | \*          |
-| `GET`    | `/menus/:menuItemId`       | MERCHANT | \*          |
-| `PATCH`  | `/menus/:menuItemId`       | MERCHANT | \*          |
-| `DELETE` | `/menus/:menuItemId`       | MERCHANT | \*          |
+| Method   | Endpoint             | Access   |
+| -------- | -------------------- | -------- |
+| `GET`    | `/menus`             | MERCHANT |
+| `POST`   | `/menus`             | MERCHANT |
+| `GET`    | `/menus/:menuItemId` | MERCHANT |
+| `PATCH`  | `/menus/:menuItemId` | MERCHANT |
+| `DELETE` | `/menus/:menuItemId` | MERCHANT |
 
 ### Surplus (`/surplus`)
 
-| Method  | Endpoint                  | Access   | Description |
-| ------- | ------------------------- | -------- | ----------- |
-| `GET`   | `/surplus`                | MERCHANT | \*          |
-| `POST`  | `/surplus`                | MERCHANT | \*          |
-| `PATCH` | `/surplus/:surplusItemId` | MERCHANT | \*          |
+| Method  | Endpoint                  | Access   |
+| ------- | ------------------------- | -------- |
+| `GET`   | `/surplus`                | MERCHANT |
+| `POST`  | `/surplus`                | MERCHANT |
+| `PATCH` | `/surplus/:surplusItemId` | MERCHANT |
 
 ### Orders (`/orders`)
 
-| Method  | Endpoint                | Access             | Description |
-| ------- | ----------------------- | ------------------ | ----------- |
-| `POST`  | `/orders`               | CUSTOMER           | \*          |
-| `GET`   | `/orders/me`            | CUSTOMER           | \*          |
-| `GET`   | `/orders/merchant`      | MERCHANT           | \*          |
-| `GET`   | `/orders/:orderId`      | CUSTOMER, MERCHANT | \*          |
-| `PATCH` | `/orders/:orderId/scan` | MERCHANT           | \*          |
+| Method  | Endpoint                  | Access             |
+| ------- | ------------------------- | ------------------ |
+| `POST`  | `/orders`                 | CUSTOMER           |
+| `GET`   | `/orders/me`              | CUSTOMER           |
+| `GET`   | `/orders/merchant`        | MERCHANT           |
+| `GET`   | `/orders/:orderId`        | CUSTOMER, MERCHANT |
+| `PATCH` | `/orders/:orderId/status` | MERCHANT           |
+| `PATCH` | `/orders/:orderId/scan`   | MERCHANT           |
 
 ### Payments (`/payments`)
 
-| Method | Endpoint                    | Access   | Description |
-| ------ | --------------------------- | -------- | ----------- |
-| `POST` | `/payments/webhook`         | PUBLIC   | \*          |
-| `POST` | `/payments/:orderId`        | CUSTOMER | \*          |
-| `POST` | `/payments/:orderId/verify` | CUSTOMER | \*          |
+| Method | Endpoint                    | Access   |
+| ------ | --------------------------- | -------- |
+| `POST` | `/payments/webhook`         | PUBLIC   |
+| `POST` | `/payments/:orderId`        | CUSTOMER |
+| `POST` | `/payments/:orderId/verify` | CUSTOMER |
 
 ### Reviews (`/reviews`)
 
-| Method | Endpoint                         | Access   | Description |
-| ------ | -------------------------------- | -------- | ----------- |
-| `POST` | `/reviews`                       | CUSTOMER | \*          |
-| `GET`  | `/merchants/:merchantId/reviews` | PUBLIC   | \*          |
+| Method | Endpoint                         | Access   |
+| ------ | -------------------------------- | -------- |
+| `POST` | `/reviews`                       | CUSTOMER |
+| `GET`  | `/merchants/:merchantId/reviews` | PUBLIC   |
 
 ## Software Architecture
 
 <img src="https://res.cloudinary.com/dmis04mcg/image/upload/v1780150374/haphap-architecture_d4lia5.png">
-
-## Appendix
-
-<img src="https://res.cloudinary.com/dmis04mcg/image/upload/v1780150389/haphap-ad_haovn2.png">
