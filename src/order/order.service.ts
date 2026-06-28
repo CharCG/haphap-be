@@ -88,6 +88,7 @@ export class OrderService {
         merchant: true,
         user: true,
         orderItems: true,
+        payment: true,
       },
     });
 
