@@ -96,16 +96,15 @@ export class OrderService {
       throw new NotFoundException('Order not found');
     }
 
-    if (currentUser.role === Role.CUSTOMER && order.userId !== currentUser.id) {
-      throw new ForbiddenException('Access denied');
-    }
+    const isCustomer = order.userId === currentUser.id;
+    const isMerchant = currentUser.role === Role.MERCHANT && order.merchant?.userId === currentUser.id;
 
-    if (currentUser.role === Role.MERCHANT && order.merchant.userId !== currentUser.id) {
+    if (!isCustomer && !isMerchant) {
       throw new ForbiddenException('Access denied');
     }
 
     return order;
-  }
+  }g
 
   async findOrderMe(userId: string) {
     return this.prismaService.order.findMany({
