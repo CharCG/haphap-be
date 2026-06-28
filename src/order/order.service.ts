@@ -112,6 +112,7 @@ export class OrderService {
       include: {
         merchant: true,
         orderItems: true,
+        review: true,
       },
       orderBy: { createdAt: 'desc' },
     });
