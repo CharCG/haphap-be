@@ -60,7 +60,7 @@ export class ApplicationController {
   }
 
   @Get('me')
-  @Roles(Role.CUSTOMER)
+  @Roles(Role.CUSTOMER, Role.MERCHANT)
   async findMyApplications(@CurrentUser() user: CurrentUserDto) {
     return this.applicationService.findMyApplications(user.id);
   }

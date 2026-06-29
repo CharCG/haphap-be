@@ -104,7 +104,7 @@ export class OrderService {
     }
 
     return order;
-  }g
+  }
 
   async findOrderMe(userId: string) {
     return this.prismaService.order.findMany({

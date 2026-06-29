@@ -16,7 +16,7 @@ export class ReviewController {
   constructor(private readonly reviewService: ReviewService) {}
 
   @Post()
-  @Roles(Role.CUSTOMER)
+  @Roles(Role.CUSTOMER, Role.MERCHANT)
   async create(@CurrentUser() user: CurrentUserDto, @Body() dto: CreateReviewDto) {
     return this.reviewService.create(user.id, dto);
   }

@@ -20,14 +20,14 @@ export class PaymentController {
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.CUSTOMER)
+  @Roles(Role.CUSTOMER, Role.MERCHANT)
   @Post(':orderId')
   async createPayment(@CurrentUser() user: CurrentUserDto, @Param('orderId') orderId: string) {
     return this.paymentService.createPayment(user.id, orderId);
   }
 
   @UseGuards(JwtAuthGuard, RolesGuard)
-  @Roles(Role.CUSTOMER)
+  @Roles(Role.CUSTOMER, Role.MERCHANT)
   @Post(':orderId/verify')
   async verifyPayment(@CurrentUser() user: CurrentUserDto, @Param('orderId') orderId: string) {
     return this.paymentService.verifyPayment(user.id, orderId);
