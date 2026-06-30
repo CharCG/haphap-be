@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PrismaService } from '../../src/prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../common/storage/storage.service';
 import { GetMerchantsQueryDto } from './dto/get-merchants-query.dto';
 import { UpdateMerchantDto } from './dto/update-merchant.dto';

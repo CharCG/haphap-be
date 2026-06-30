@@ -12,12 +12,12 @@ import {
 } from '@nestjs/common';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { ApplicationService } from './application.service';
-import { JwtAuthGuard } from '../../src/auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../../src/auth/guards/roles.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '../generated/prisma/enums';
-import { CurrentUser } from '../../src/common/decorators/current-user.decorator';
-import { CurrentUserDto } from '../../src/common/dto/current-user.dto';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { CurrentUserDto } from '../common/dto/current-user.dto';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { UpdateApplicationDto } from './dto/update-application.dto';
 import { ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
