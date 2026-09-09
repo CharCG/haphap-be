@@ -1,5 +1,5 @@
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { ApplicationStatus } from '../../generated/prisma/enums';
+import { ApplicationStatus } from '../../generated/prisma/enums.js';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateApplicationDto {

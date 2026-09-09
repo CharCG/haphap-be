@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PrismaService } from '../prisma/prisma.service';
-import { StorageService } from '../storage/storage.service';
-import { GetMerchantsQueryDto } from './dto/get-merchants-query.dto';
-import { UpdateMerchantDto } from './dto/update-merchant.dto';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { StorageService } from '../storage/storage.service.js';
+import { GetMerchantsQueryDto } from './dto/get-merchants-query.dto.js';
+import { UpdateMerchantDto } from './dto/update-merchant.dto.js';
 
 @Injectable()
 export class MerchantService {

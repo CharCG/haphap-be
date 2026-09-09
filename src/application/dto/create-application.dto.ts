@@ -1,6 +1,6 @@
 import { IsArray, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, Matches } from 'class-validator';
 import { Type, Transform } from 'class-transformer';
-import { BankType, MerchantCategory } from '../../generated/prisma/enums';
+import { BankType, MerchantCategory } from '../../generated/prisma/enums.js';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateApplicationDto {

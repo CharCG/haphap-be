@@ -1,14 +1,14 @@
 import { Body, Controller, Get, Param, Patch, Query, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { MerchantService } from './merchant.service';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
-import { Role } from '../generated/prisma/enums';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { CurrentUserDto } from '../common/dto/current-user.dto';
-import { GetMerchantsQueryDto } from './dto/get-merchants-query.dto';
-import { UpdateMerchantDto } from './dto/update-merchant.dto';
+import { MerchantService } from './merchant.service.js';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../common/guards/roles.guard.js';
+import { Roles } from '../common/decorators/roles.decorator.js';
+import { Role } from '../generated/prisma/enums.js';
+import { CurrentUser } from '../common/decorators/current-user.decorator.js';
+import { CurrentUserDto } from '../common/dto/current-user.dto.js';
+import { GetMerchantsQueryDto } from './dto/get-merchants-query.dto.js';
+import { UpdateMerchantDto } from './dto/update-merchant.dto.js';
 import { ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 
 @Controller('merchants')

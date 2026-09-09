@@ -1,8 +1,8 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { MidtransService } from './midtrans.service';
-import { OrderStatus, PaymentStatus } from '../generated/prisma/enums';
-import { MidtransWebhookDto } from './dto/midtrans-webhook.dto';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { MidtransService } from './midtrans.service.js';
+import { OrderStatus, PaymentStatus } from '../generated/prisma/enums.js';
+import { MidtransWebhookDto } from './dto/midtrans-webhook.dto.js';
 
 @Injectable()
 export class PaymentService {

@@ -1,14 +1,14 @@
 import { Body, Controller, Get, Patch, UploadedFile, UseGuards, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { UserService } from './user.service';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
-import { Role } from '../generated/prisma/enums';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { CurrentUserDto } from '../common/dto/current-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { UpdatePasswordDto } from './dto/update-password.dto';
+import { UserService } from './user.service.js';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../common/guards/roles.guard.js';
+import { Roles } from '../common/decorators/roles.decorator.js';
+import { Role } from '../generated/prisma/enums.js';
+import { CurrentUser } from '../common/decorators/current-user.decorator.js';
+import { CurrentUserDto } from '../common/dto/current-user.dto.js';
+import { UpdateUserDto } from './dto/update-user.dto.js';
+import { UpdatePasswordDto } from './dto/update-password.dto.js';
 import { ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 
 @ApiBearerAuth()

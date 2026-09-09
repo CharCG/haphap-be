@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateSurplusDto } from './dto/create-surplus.dto';
-import { UpdateSurplusDto } from './dto/update-surplus.dto';
+import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { CreateSurplusDto } from './dto/create-surplus.dto.js';
+import { UpdateSurplusDto } from './dto/update-surplus.dto.js';
 
 @Injectable()
 export class SurplusService {

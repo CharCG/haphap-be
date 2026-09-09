@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Snap } from 'midtrans-client';
-import { CreateTransactionDto } from './dto/create-transaction.dto';
-import { MidtransWebhookDto } from './dto/midtrans-webhook.dto';
+import { CreateTransactionDto } from './dto/create-transaction.dto.js';
+import { MidtransWebhookDto } from './dto/midtrans-webhook.dto.js';
 import * as crypto from 'crypto';
 
 @Injectable()

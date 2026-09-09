@@ -1,15 +1,15 @@
 import { Controller, Post, Body, UseGuards, Get, Param, Patch } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { OrderService } from './order.service';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
-import { ScanOrderDto } from './dto/scan-order.dto';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
-import { Role } from '../generated/prisma/enums';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { CurrentUserDto } from '../common/dto/current-user.dto';
+import { OrderService } from './order.service.js';
+import { CreateOrderDto } from './dto/create-order.dto.js';
+import { UpdateOrderStatusDto } from './dto/update-order-status.dto.js';
+import { ScanOrderDto } from './dto/scan-order.dto.js';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../common/guards/roles.guard.js';
+import { Roles } from '../common/decorators/roles.decorator.js';
+import { Role } from '../generated/prisma/enums.js';
+import { CurrentUser } from '../common/decorators/current-user.decorator.js';
+import { CurrentUserDto } from '../common/dto/current-user.dto.js';
 
 @ApiBearerAuth()
 @Controller('orders')

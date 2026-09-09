@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { SurplusController } from './surplus.controller';
-import { SurplusService } from './surplus.service';
+import { SurplusController } from './surplus.controller.js';
+import { SurplusService } from './surplus.service.js';
 
 @Module({
   controllers: [SurplusController],

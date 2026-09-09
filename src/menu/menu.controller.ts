@@ -11,15 +11,15 @@ import {
   UploadedFile,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { MenuService } from './menu.service';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
-import { Role } from '../generated/prisma/enums';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { CurrentUserDto } from '../common/dto/current-user.dto';
-import { CreateMenuItemDto } from './dto/create-menu-item.dto';
-import { UpdateMenuItemDto } from './dto/update-menu-item.dto';
+import { MenuService } from './menu.service.js';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../common/guards/roles.guard.js';
+import { Roles } from '../common/decorators/roles.decorator.js';
+import { Role } from '../generated/prisma/enums.js';
+import { CurrentUser } from '../common/decorators/current-user.decorator.js';
+import { CurrentUserDto } from '../common/dto/current-user.dto.js';
+import { CreateMenuItemDto } from './dto/create-menu-item.dto.js';
+import { UpdateMenuItemDto } from './dto/update-menu-item.dto.js';
 import { ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 
 @ApiBearerAuth()

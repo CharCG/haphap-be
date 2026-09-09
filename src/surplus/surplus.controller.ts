@@ -1,13 +1,13 @@
 import { Body, Controller, Get, Param, Patch, Post, UseGuards } from '@nestjs/common';
-import { SurplusService } from './surplus.service';
-import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../common/guards/roles.guard';
-import { Roles } from '../common/decorators/roles.decorator';
-import { Role } from '../generated/prisma/enums';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { CurrentUserDto } from '../common/dto/current-user.dto';
-import { CreateSurplusDto } from './dto/create-surplus.dto';
-import { UpdateSurplusDto } from './dto/update-surplus.dto';
+import { SurplusService } from './surplus.service.js';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../common/guards/roles.guard.js';
+import { Roles } from '../common/decorators/roles.decorator.js';
+import { Role } from '../generated/prisma/enums.js';
+import { CurrentUser } from '../common/decorators/current-user.decorator.js';
+import { CurrentUserDto } from '../common/dto/current-user.dto.js';
+import { CreateSurplusDto } from './dto/create-surplus.dto.js';
+import { UpdateSurplusDto } from './dto/update-surplus.dto.js';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiBearerAuth()
