@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
+import { ConfigModule } from '@nestjs/config';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { MerchantModule } from './merchant/merchant.module';
@@ -33,11 +32,6 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     SurplusModule,
     MenuModule,
     StorageModule,
-    // ObserveModule.forRoot({
-    //   appKey: process.env.OBSERVE_APP_KEY,
-    //   appSecret: process.env.OBSERVE_APP_SECRET,
-    //   serviceId: 'haphap-be',
-    // }),
   ],
   controllers: [AppController],
   providers: [],
