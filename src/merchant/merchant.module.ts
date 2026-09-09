@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MerchantController } from './merchant.controller';
 import { MerchantService } from './merchant.service';
-import { StorageModule } from '../common/storage/storage.module';
+import { StorageModule } from '../storage/storage.module';
 
 @Module({
   imports: [StorageModule],

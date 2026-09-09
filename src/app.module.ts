@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
-import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { MerchantModule } from './merchant/merchant.module';
@@ -12,22 +11,16 @@ import { PaymentModule } from './payment/payment.module';
 import { OrderModule } from './order/order.module';
 import { SurplusModule } from './surplus/surplus.module';
 import { MenuModule } from './menu/menu.module';
-import { StorageModule } from './common/storage/storage.module';
+import { StorageModule } from './storage/storage.module';
+import { AppController } from './app.controller';
+import { createObserveModule } from '@nestjs/observe';
+
+export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-    }),
-    ThrottlerModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (config: ConfigService) => [
-        {
-          ttl: parseInt(config.get('THROTTLE_TTL')!),
-          limit: parseInt(config.get('THROTTLE_LIMIT')!),
-        },
-      ],
     }),
     PrismaModule,
     AuthModule,
@@ -40,13 +33,13 @@ import { StorageModule } from './common/storage/storage.module';
     SurplusModule,
     MenuModule,
     StorageModule,
+    // ObserveModule.forRoot({
+    //   appKey: process.env.OBSERVE_APP_KEY,
+    //   appSecret: process.env.OBSERVE_APP_SECRET,
+    //   serviceId: 'haphap-be',
+    // }),
   ],
-  controllers: [],
-  providers: [
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
-    },
-  ],
+  controllers: [AppController],
+  providers: [],
 })
 export class AppModule {}
