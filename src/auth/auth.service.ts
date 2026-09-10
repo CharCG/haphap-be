@@ -17,11 +17,11 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {
-    this.googleOAuthClient = new OAuth2Client(
-      this.configService.get('GOOGLE_CLIENT_ID'),
-      this.configService.get('GOOGLE_CLIENT_SECRET'),
-      this.configService.get('GOOGLE_CALLBACK_URL'),
-    );
+    this.googleOAuthClient = new OAuth2Client({
+      clientId: configService.get<string>('GOOGLE_CLIENT_ID')!,
+      clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET')!,
+      redirectUri: configService.get<string>('GOOGLE_CALLBACK_URL')!,
+    });
   }
 
   async register(dto: RegisterDto) {
