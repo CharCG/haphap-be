@@ -209,3 +209,6 @@ All endpoints return responses using the following standardized format:
 ## Software Architecture
 
 <img src="https://res.cloudinary.com/dmis04mcg/image/upload/v1780150374/haphap-architecture_d4lia5.png">
+
+## License
+

@@ -1,20 +1,17 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { PrismaModule } from './prisma/prisma.module';
-import { AuthModule } from './auth/auth.module';
-import { MerchantModule } from './merchant/merchant.module';
-import { UserModule } from './user/user.module';
-import { ReviewModule } from './review/review.module';
-import { ApplicationModule } from './application/application.module';
-import { PaymentModule } from './payment/payment.module';
-import { OrderModule } from './order/order.module';
-import { SurplusModule } from './surplus/surplus.module';
-import { MenuModule } from './menu/menu.module';
-import { StorageModule } from './storage/storage.module';
-import { AppController } from './app.controller';
-import { createObserveModule } from '@nestjs/observe';
-
-export const { ObserveModule, ObserveInstrument } = createObserveModule();
+import { PrismaModule } from './prisma/prisma.module.js';
+import { AuthModule } from './auth/auth.module.js';
+import { MerchantModule } from './merchant/merchant.module.js';
+import { UserModule } from './user/user.module.js';
+import { ReviewModule } from './review/review.module.js';
+import { ApplicationModule } from './application/application.module.js';
+import { PaymentModule } from './payment/payment.module.js';
+import { OrderModule } from './order/order.module.js';
+import { SurplusModule } from './surplus/surplus.module.js';
+import { MenuModule } from './menu/menu.module.js';
+import { StorageModule } from './storage/storage.module.js';
+import { AppController } from './app.controller.js';
 
 @Module({
   imports: [
