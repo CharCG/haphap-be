@@ -1,7 +1,7 @@
 import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateReviewDto } from './dto/create-review.dto.js';
-import { OrderStatus } from '../generated/prisma/browser.js';
+import { OrderStatus } from '../generated/prisma/enums.js';
 
 @Injectable()
 export class ReviewService {
@@ -32,11 +32,25 @@ export class ReviewService {
       throw new BadRequestException('Order has already been reviewed');
     }
 
-    const review = await this.prismaService.review.create({
-      data: {
-        ...dto,
-        userId,
-      },
+    const review = await this.prismaService.$transaction(async (prisma) => {
+      const createdReview = await prisma.review.create({
+        data: {
+          ...dto,
+          userId,
+        },
+      });
+
+      const { _avg } = await prisma.review.aggregate({
+        where: { merchantId: dto.merchantId },
+        _avg: { rating: true },
+      });
+
+      await prisma.merchant.update({
+        where: { id: dto.merchantId },
+        data: { rating: _avg.rating ?? 0 },
+      });
+
+      return createdReview;
     });
 
     return {
