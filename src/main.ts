@@ -4,14 +4,17 @@ import { ValidationPipe } from '@nestjs/common';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter.js';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor.js';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    allowedOrigins: process.env.ALLOWED_ORIGINS!.split(',').map((o) => o.trim()),
+    origin: process.env.ALLOWED_ORIGINS!.split(',').map((o) => o.trim()),
     credentials: true,
   });
+
+  app.use(helmet());
 
   app.setGlobalPrefix('api');
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));

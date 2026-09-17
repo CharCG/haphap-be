@@ -2,30 +2,20 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { StorageService } from '../storage/storage.service.js';
+import { MerchantService } from '../merchant/merchant.service.js';
 import { CreateMenuItemDto } from './dto/create-menu-item.dto.js';
 import { UpdateMenuItemDto } from './dto/update-menu-item.dto.js';
 
 @Injectable()
 export class MenuService {
   constructor(
+    private readonly configService: ConfigService,
     private readonly prismaService: PrismaService,
     private readonly storageService: StorageService,
-    private readonly configService: ConfigService,
+    private readonly merchantService: MerchantService,
   ) {}
 
-  private async getMerchantIdByUserId(userId: string): Promise<string> {
-    const merchant = await this.prismaService.merchant.findUnique({
-      where: { userId },
-    });
-
-    if (!merchant) {
-      throw new NotFoundException('Merchant profile not found for this user');
-    }
-
-    return merchant.id;
-  }
-
-  private async validateMenuOwner(menuItemId: string, merchantId: string) {
+  async validateMenuOwner(menuItemId: string, merchantId: string) {
     const menuItem = await this.prismaService.menuItem.findUnique({
       where: { id: menuItemId },
     });
@@ -42,7 +32,7 @@ export class MenuService {
   }
 
   async findAll(userId: string) {
-    const merchantId = await this.getMerchantIdByUserId(userId);
+    const merchantId = await this.merchantService.getMerchantIdByUserId(userId);
 
     const items = await this.prismaService.menuItem.findMany({
       where: { merchantId },
@@ -60,16 +50,8 @@ export class MenuService {
   }
 
   async findOne(userId: string, menuItemId: string) {
-    const merchantId = await this.getMerchantIdByUserId(userId);
-    await this.validateMenuOwner(menuItemId, merchantId);
-
-    const menuItem = await this.prismaService.menuItem.findUnique({
-      where: { id: menuItemId },
-    });
-
-    if (!menuItem || !menuItem.isActive) {
-      throw new NotFoundException('Menu item not found');
-    }
+    const merchantId = await this.merchantService.getMerchantIdByUserId(userId);
+    const menuItem = await this.validateMenuOwner(menuItemId, merchantId);
 
     return {
       menuItemId: menuItem.id,
@@ -82,7 +64,7 @@ export class MenuService {
   }
 
   async create(userId: string, dto: CreateMenuItemDto, imageFile?: Express.Multer.File) {
-    const merchantId = await this.getMerchantIdByUserId(userId);
+    const merchantId = await this.merchantService.getMerchantIdByUserId(userId);
 
     let imageUrl: string | undefined = undefined;
 
@@ -110,7 +92,7 @@ export class MenuService {
   }
 
   async update(userId: string, menuItemId: string, dto: UpdateMenuItemDto) {
-    const merchantId = await this.getMerchantIdByUserId(userId);
+    const merchantId = await this.merchantService.getMerchantIdByUserId(userId);
     await this.validateMenuOwner(menuItemId, merchantId);
 
     const updatedMenuItem = await this.prismaService.menuItem.update({
@@ -128,7 +110,7 @@ export class MenuService {
   }
 
   async remove(userId: string, menuItemId: string) {
-    const merchantId = await this.getMerchantIdByUserId(userId);
+    const merchantId = await this.merchantService.getMerchantIdByUserId(userId);
     await this.validateMenuOwner(menuItemId, merchantId);
 
     const deletedMenuItem = await this.prismaService.menuItem.update({

@@ -69,14 +69,27 @@ export class ApplicationService {
     avatarFile: Express.Multer.File,
     documentFile: Express.Multer.File,
   ) {
-    const activeApps = await this.prismaService.application.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' },
+    const user = await this.prismaService.user.findUnique({
+      where: { id: userId },
+      include: { merchant: true },
     });
 
-    const hasPending = activeApps.some((a) => a.status === ApplicationStatus.PENDING);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
 
-    if (hasPending) {
+    if (user.role === Role.MERCHANT || user.merchant) {
+      throw new BadRequestException('You already registered as a merchant');
+    }
+
+    const pendingApp = await this.prismaService.application.findFirst({
+      where: {
+        userId,
+        status: ApplicationStatus.PENDING,
+      },
+    });
+
+    if (pendingApp) {
       throw new BadRequestException('You already have a pending application');
     }
 
@@ -129,7 +142,7 @@ export class ApplicationService {
     }
 
     if (application.status !== ApplicationStatus.PENDING) {
-      throw new BadRequestException(`Application is already ${application.status}`);
+      throw new BadRequestException(`Application already ${application.status}`);
     }
 
     let updatedApp;
