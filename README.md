@@ -1,35 +1,27 @@
 <div align="center">
-	<a><img src="https://res.cloudinary.com/dmis04mcg/image/upload/v1780150130/haphap-logo_shcwvc.png" alt="HapHap Logo" width="35%"></a>
+	<a><img src="https://res.cloudinary.com/dmis04mcg/image/upload/v1780150130/haphap-logo_shcwvc.png" alt="" width="35%"></a>
 </div>
 
 <div align="center">
-	<img src="https://img.shields.io/badge/Node.js-16.x-339933?logo=nodedotjs" alt="Node.js">
-	<img src="https://img.shields.io/badge/NestJS-12.x-E0234E?logo=nestjs" alt="NestJS">
-	<img src="https://img.shields.io/badge/TypeScript-6.x-3178C6?logo=typescript" alt="TypeScript">
-  <img src="https://img.shields.io/badge/Prisma-7.x-2D3748?logo=prisma" alt="Prisma">
-  <img src="https://img.shields.io/badge/PostgreSQL-16.x-4169E1?logo=postgresql" alt="PostgreSQL">
-  <img src="https://img.shields.io/badge/Supabase-gray?logo=supabase" alt="Supabase">
-  <img src="https://img.shields.io/badge/Vitest-5.x-77FF00?logo=vitest" alt="Vitest">
-  <img src="https://img.shields.io/badge/Oxlint-5.x-00F7F1?logo=oxc" alt="">
-  <img src="https://img.shields.io/badge/Swagger-gray?logo=swagger" alt="Swagger">
-  <img src="https://img.shields.io/badge/Midtrans-gray?logo=data:image/svg+xml;base64,PHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1NS40MiA1OS43OTMiPjxkZWZzPjxzdHlsZT4uY2xzLTF7ZmlsbDojOWRkY2Y5O30uY2xzLTEsLmNscy0yLC5jbHMtM3tmaWxsLXJ1bGU6ZXZlbm9kZDt9LmNscy0ye2ZpbGw6IzAwYWNkYjt9LmNscy0ze2ZpbGw6IzAyNTZhNzt9PC9zdHlsZT48L2RlZnM+PHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMy45NTksNDguMjQzQTMuOTU4LDMuOTU4LDAsMCwxLDAsNDQuMjg1di0yOC44YTMuOTU5LDMuOTU5LDAsMSwxLDcuOTE3LDB2MjguOEEzLjk1OCwzLjk1OCwwLDAsMSwzLjk1OSw0OC4yNDNaIi8+PHBhdGggY2xhc3M9ImNscy0yIiBkPSJNNTEuNDYxLDQ4LjI0M0EzLjk1OCwzLjk1OCwwLDAsMSw0Ny41LDQ0LjI4NVYxNS41MDhhMy45NTksMy45NTksMCwxLDEsNy45MTcsMFY0NC4yODVBMy45NTksMy45NTksMCwwLDEsNTEuNDYxLDQ4LjI0M1oiLz48cGF0aCBjbGFzcz0iY2xzLTMiIGQ9Ik0yNy43MSw1OS43OTNhMy45NiwzLjk2LDAsMCwxLTMuOTU5LTMuOTU5VjMuOTU5YTMuOTU5LDMuOTU5LDAsMSwxLDcuOTE3LDBWNTUuODM0QTMuOTU5LDMuOTU5LDAsMCwxLDI3LjcxLDU5Ljc5M1oiLz48L3N2Zz4=">
+	<a><img src="https://img.shields.io/badge/Node.js-16.x-339933?logo=nodedotjs"></a>
+	<a><img src="https://img.shields.io/badge/NestJS-11.x-E0234E?logo=nestjs"></a>
+	<a><img src="https://img.shields.io/badge/TypeScript-5.x-3178C6?logo=typescript"></a>
+  <a><img src="https://img.shields.io/badge/Prisma-7.x-2D3748?logo=prisma"></a>
+  <a><img src="https://img.shields.io/badge/PostgreSQL-16.x-4169E1?logo=postgresql"></a>
+  <a><img src="https://img.shields.io/badge/Supabase-gray?logo=supabase"></a>
+  <a><img src="https://img.shields.io/badge/Midtrans-gray?logo=data:image/svg+xml;base64,PHN2ZyBpZD0iTGF5ZXJfMSIgZGF0YS1uYW1lPSJMYXllciAxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1NS40MiA1OS43OTMiPjxkZWZzPjxzdHlsZT4uY2xzLTF7ZmlsbDojOWRkY2Y5O30uY2xzLTEsLmNscy0yLC5jbHMtM3tmaWxsLXJ1bGU6ZXZlbm9kZDt9LmNscy0ye2ZpbGw6IzAwYWNkYjt9LmNscy0ze2ZpbGw6IzAyNTZhNzt9PC9zdHlsZT48L2RlZnM+PHBhdGggY2xhc3M9ImNscy0xIiBkPSJNMy45NTksNDguMjQzQTMuOTU4LDMuOTU4LDAsMCwxLDAsNDQuMjg1di0yOC44YTMuOTU5LDMuOTU5LDAsMSwxLDcuOTE3LDB2MjguOEEzLjk1OCwzLjk1OCwwLDAsMSwzLjk1OSw0OC4yNDNaIi8+PHBhdGggY2xhc3M9ImNscy0yIiBkPSJNNTEuNDYxLDQ4LjI0M0EzLjk1OCwzLjk1OCwwLDAsMSw0Ny41LDQ0LjI4NVYxNS41MDhhMy45NTksMy45NTksMCwxLDEsNy45MTcsMFY0NC4yODVBMy45NTksMy45NTksMCwwLDEsNTEuNDYxLDQ4LjI0M1oiLz48cGF0aCBjbGFzcz0iY2xzLTMiIGQ9Ik0yNy43MSw1OS43OTNhMy45NiwzLjk2LDAsMCwxLTMuOTU5LTMuOTU5VjMuOTU5YTMuOTU5LDMuOTU5LDAsMSwxLDcuOTE3LDBWNTUuODM0QTMuOTU5LDMuOTU5LDAsMCwxLDI3LjcxLDU5Ljc5M1oiLz48L3N2Zz4="></a>
 </div>
 
 ## Description
 
-[HapHap]() is a dual-sided surplus food marketplace that connects customers with local merchants to rescue the day's high-quality unsold meals at discounted prices. By actively reducing food waste, the platform directly supports [SDG 12: Responsible Consumption and Production](https://sdgs.un.org/goals/goal12).
+[HapHap]() is a dual-sided surplus food marketplace that connects customers with local merchants to rescue the day's high-quality unsold meals at discounted prices. By actively reducing food waste, the platform directly supports [SDG 12](https://sdgs.un.org/goals/goal12) (Responsible Consumption and Production).
 
-## Table of Contents
+## Documentation
 
 - [Features](#features)
 - [Getting Started](#getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-  - [Environment Variables](#environment-variables)
-  - [Database Setup](#database-setup)
-  - [Running](#running)
-- [Endpoints](#endpoints)
 - [Tech Stack](#tech-stack)
+- [Endpoints](#endpoints)
 - [Software Architecture](#software-architecture)
 - [Appendix](#appendix)
 
@@ -106,6 +98,21 @@ npm run build
 npm run start:prod
 ```
 
+## Tech Stack
+
+| Layer          | Technology            | Version |
+| -------------- | --------------------- | ------- |
+| Runtime        | Node.js               | 16.x    |
+| Framework      | NestJS                | 11.x    |
+| Language       | TypeScript            | 5.x     |
+| ORM            | Prisma                | 7.x     |
+| Database       | PostgreSQL (Supabase) | 16.x    |
+| Object Storage | Supabase Storage      | -       |
+| Payments       | Midtrans              | -       |
+| Documentation  | Swagger               | -       |
+
+###
+
 ## Endpoints
 
 Base URL: `/api`
@@ -118,13 +125,6 @@ All endpoints return responses using the following standardized format:
 	"statusCode": 200,
 	"message": "...",
 	"data": { ... }
-}
-
-{
-  "success": false,
-  "statusCode": 400,
-  "message": "...",
-  "data": { ... }
 }
 ```
 
@@ -206,23 +206,9 @@ All endpoints return responses using the following standardized format:
 | `POST` | `/reviews`                       | CUSTOMER |
 | `GET`  | `/merchants/:merchantId/reviews` | PUBLIC   |
 
-## Tech Stack
-
-| Layer          | Technology            | Version |
-| -------------- | --------------------- | ------- |
-| Runtime        | Node.js               | 16.x    |
-| Framework      | NestJS                | 11.x    |
-| Language       | TypeScript            | 5.x     |
-| ORM            | Prisma                | 7.x     |
-| Database       | PostgreSQL (Supabase) | 16.x    |
-| Object Storage | Supabase Storage      | -       |
-| Payments       | Midtrans              | -       |
-| Documentation  | Swagger               | -       |
-
 ## Software Architecture
 
 <img src="https://res.cloudinary.com/dmis04mcg/image/upload/v1780150374/haphap-architecture_d4lia5.png">
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).

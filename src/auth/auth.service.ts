@@ -81,12 +81,12 @@ export class AuthService {
   }
 
   async googleLogin(dto: GoogleLoginDto) {
-    const ticket = await this.googleOAuthClient.verifyIdToken({
+    const tikcet = await this.googleOAuthClient.verifyIdToken({
       idToken: dto.idToken,
       audience: this.configService.get<string>('GOOGLE_WEB_CLIENT_ID'),
     });
 
-    const payload = ticket.getPayload();
+    const payload = tikcet.getPayload();
 
     if (!payload || !payload.email) {
       throw new UnauthorizedException('Invalid credentials');
@@ -103,7 +103,7 @@ export class AuthService {
 
       user = await this.prismaService.user.create({
         data: {
-          name: name ?? email.split('@')[0],
+          name: name ?? 'PuyPuy',
           email,
           password: randomHashedPassword,
           phone: '',

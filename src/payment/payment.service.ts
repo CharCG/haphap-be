@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { MidtransService } from './midtrans.service.js';
-import { OrderService } from '../order/order.service.js';
 import { OrderStatus, PaymentStatus } from '../generated/prisma/enums.js';
 import { MidtransWebhookDto } from './dto/midtrans-webhook.dto.js';
 
@@ -10,7 +9,6 @@ export class PaymentService {
   constructor(
     private readonly midtransService: MidtransService,
     private readonly prismaService: PrismaService,
-    private readonly orderService: OrderService,
   ) {}
 
   private resolveStatus(transactionStatus: string, fraudStatus: string) {
@@ -106,11 +104,6 @@ export class PaymentService {
       throw new NotFoundException('Payment not found');
     }
 
-    const terminalStatuses: PaymentStatus[] = [PaymentStatus.SUCCESS, PaymentStatus.FAILED, PaymentStatus.EXPIRED];
-    if (terminalStatuses.includes(payment.status)) {
-      return { received: true };
-    }
-
     await this.prismaService.$transaction([
       this.prismaService.payment.update({
         where: { id: payment.id },
@@ -125,10 +118,6 @@ export class PaymentService {
         },
       }),
     ]);
-
-    if (orderStatus === OrderStatus.CANCELLED) {
-      await this.orderService.restoreOrderStock(order_id);
-    }
 
     return { received: true };
   }

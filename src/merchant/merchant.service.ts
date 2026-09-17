@@ -13,18 +13,6 @@ export class MerchantService {
     private readonly configService: ConfigService,
   ) {}
 
-  async getMerchantIdByUserId(userId: string): Promise<string> {
-    const merchant = await this.prismaService.merchant.findUnique({
-      where: { userId },
-    });
-
-    if (!merchant) {
-      throw new NotFoundException('Merchant profile not found for this user');
-    }
-
-    return merchant.id;
-  }
-
   async findAll(dto: GetMerchantsQueryDto) {
     const merchants = await this.prismaService.merchant.findMany({
       where: {

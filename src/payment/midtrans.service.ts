@@ -40,11 +40,6 @@ export class MidtransService {
     const serverKey = this.configService.get<string>('MIDTRANS_SERVER_KEY')!;
     const payload = `${dto.order_id}${dto.status_code}${dto.gross_amount}${serverKey}`;
     const hash = crypto.createHash('sha512').update(payload).digest('hex');
-
-    try {
-      return crypto.timingSafeEqual(Buffer.from(hash, 'hex'), Buffer.from(dto.signature_key, 'hex'));
-    } catch {
-      return false;
-    }
+    return hash === dto.signature_key;
   }
 }

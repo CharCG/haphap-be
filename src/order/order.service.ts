@@ -1,6 +1,5 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { MerchantService } from '../merchant/merchant.service.js';
 import { CreateOrderDto } from './dto/create-order.dto.js';
 import { UpdateOrderStatusDto, OrderActionStatus } from './dto/update-order-status.dto.js';
 import { CurrentUserDto } from '../common/dto/current-user.dto.js';
@@ -10,25 +9,7 @@ import { QrCodeUtil } from '../common/utils/qrcode.util.js';
 
 @Injectable()
 export class OrderService {
-  constructor(
-    private readonly prismaService: PrismaService,
-    private readonly merchantService: MerchantService,
-  ) {}
-
-  async restoreOrderStock(orderId: string) {
-    const orderItems = await this.prismaService.orderItem.findMany({
-      where: { orderId },
-    });
-
-    await this.prismaService.$transaction(
-      orderItems.map((item) =>
-        this.prismaService.surplusItem.update({
-          where: { id: item.surplusItemId },
-          data: { stock: { increment: item.quantity } },
-        }),
-      ),
-    );
-  }
+  constructor(private readonly prismaService: PrismaService) {}
 
   async create(userId: string, dto: CreateOrderDto) {
     const order = await this.prismaService.$transaction(async (prisma) => {
@@ -138,10 +119,16 @@ export class OrderService {
   }
 
   async findOrderMerchant(userId: string) {
-    const merchantId = await this.merchantService.getMerchantIdByUserId(userId);
+    const merchant = await this.prismaService.merchant.findUnique({
+      where: { userId },
+    });
+
+    if (!merchant) {
+      throw new NotFoundException('Merchant profile not found for this user');
+    }
 
     return this.prismaService.order.findMany({
-      where: { merchantId },
+      where: { merchantId: merchant.id },
       include: {
         user: true,
         orderItems: true,
@@ -186,8 +173,6 @@ export class OrderService {
         data: { status: OrderStatus.CANCELLED },
         include: { orderItems: true },
       });
-
-      await this.restoreOrderStock(orderId);
     }
 
     if (dto.status === OrderActionStatus.READY) {
@@ -199,7 +184,7 @@ export class OrderService {
         throw new BadRequestException('QR code already exists');
       }
 
-      const qrCode = QrCodeUtil.generateToken(orderId);
+      const qrCode = await QrCodeUtil.generateToken(orderId);
       updatedOrder = await this.prismaService.order.update({
         where: { id: orderId },
         data: { qrCode },
