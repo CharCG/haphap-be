@@ -17,11 +17,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {
-    this.googleOAuthClient = new OAuth2Client({
-      clientId: configService.get<string>('GOOGLE_CLIENT_ID')!,
-      clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET')!,
-      redirectUri: configService.get<string>('GOOGLE_CALLBACK_URL')!,
-    });
+    this.googleOAuthClient = new OAuth2Client(this.configService.get<string>('GOOGLE_CLIENT_ID'));
   }
 
   async register(dto: RegisterDto) {
@@ -83,7 +79,7 @@ export class AuthService {
   async googleLogin(dto: GoogleLoginDto) {
     const tikcet = await this.googleOAuthClient.verifyIdToken({
       idToken: dto.idToken,
-      audience: this.configService.get<string>('GOOGLE_WEB_CLIENT_ID'),
+      audience: this.configService.get<string>('GOOGLE_CLIENT_ID'),
     });
 
     const payload = tikcet.getPayload();
