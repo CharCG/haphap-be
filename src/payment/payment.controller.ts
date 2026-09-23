@@ -1,18 +1,18 @@
 import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
-import { PaymentService } from './payment.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { RolesGuard } from '../auth/guards/roles.guard';
-import { Roles } from '../auth/decorators/roles.decorator';
-import { Role } from '../generated/prisma/enums';
-import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { CurrentUserDto } from '../common/dto/current-user.dto';
-import { MidtransWebhookDto } from './dto/midtrans-webhook.dto';
+import { PaymentService } from './payment.service.js';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard.js';
+import { RolesGuard } from '../common/guards/roles.guard.js';
+import { Roles } from '../common/decorators/roles.decorator.js';
+import { Role } from '../generated/prisma/enums.js';
+import { CurrentUser } from '../common/decorators/current-user.decorator.js';
+import { CurrentUserDto } from '../common/dto/current-user.dto.js';
+import { MidtransWebhookDto } from './dto/midtrans-webhook.dto.js';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiBearerAuth()
 @Controller('payments')
 export class PaymentController {
-  constructor(private readonly paymentService: PaymentService) { }
+  constructor(private readonly paymentService: PaymentService) {}
 
   @Post('webhook')
   async handleWebhook(@Body() dto: MidtransWebhookDto) {

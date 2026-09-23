@@ -1,11 +1,11 @@
 import { BadRequestException, ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderStatusDto, OrderActionStatus } from './dto/update-order-status.dto';
-import { CurrentUserDto } from '../common/dto/current-user.dto';
-import { Role, OrderStatus } from '../generated/prisma/enums';
-import { Prisma } from '../generated/prisma/client';
-import { QrCodeUtil } from '../common/utils/qrcode.util';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { CreateOrderDto } from './dto/create-order.dto.js';
+import { UpdateOrderStatusDto, OrderActionStatus } from './dto/update-order-status.dto.js';
+import { CurrentUserDto } from '../common/dto/current-user.dto.js';
+import { Role, OrderStatus } from '../generated/prisma/enums.js';
+import { Prisma } from '../generated/prisma/client.js';
+import { QrCodeUtil } from '../common/utils/qrcode.util.js';
 
 @Injectable()
 export class OrderService {
@@ -157,7 +157,7 @@ export class OrderService {
       if (order.status !== OrderStatus.PROCESSING) {
         throw new BadRequestException(`Order is already ${order.status}`);
       }
-      
+
       updatedOrder = await this.prismaService.order.update({
         where: { id: orderId },
         data: { status: OrderStatus.READY },

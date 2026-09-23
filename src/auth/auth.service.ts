@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service.js';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { RegisterDto } from './dto/register.dto';
-import { LoginDto } from './dto/login.dto';
-import { GoogleLoginDto } from './dto/google-login.dto';
+import { RegisterDto } from './dto/register.dto.js';
+import { LoginDto } from './dto/login.dto.js';
+import { GoogleLoginDto } from './dto/google-login.dto.js';
 import { OAuth2Client } from 'google-auth-library';
 import bcrypt from 'bcrypt';
 
@@ -17,11 +17,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {
-    this.googleOAuthClient = new OAuth2Client(
-      this.configService.get('GOOGLE_CLIENT_ID'),
-      this.configService.get('GOOGLE_CLIENT_SECRET'),
-      this.configService.get('GOOGLE_CALLBACK_URL'),
-    );
+    this.googleOAuthClient = new OAuth2Client(this.configService.get<string>('GOOGLE_CLIENT_ID'));
   }
 
   async register(dto: RegisterDto) {
@@ -83,7 +79,7 @@ export class AuthService {
   async googleLogin(dto: GoogleLoginDto) {
     const tikcet = await this.googleOAuthClient.verifyIdToken({
       idToken: dto.idToken,
-      audience: this.configService.get<string>('GOOGLE_WEB_CLIENT_ID'),
+      audience: this.configService.get<string>('GOOGLE_CLIENT_ID'),
     });
 
     const payload = tikcet.getPayload();

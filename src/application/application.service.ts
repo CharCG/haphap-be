@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { PrismaService } from '../prisma/prisma.service';
-import { StorageService } from '../common/storage/storage.service';
-import { CreateApplicationDto } from './dto/create-application.dto';
-import { UpdateApplicationDto } from './dto/update-application.dto';
-import { ApplicationStatus, Role } from '../generated/prisma/enums';
+import { PrismaService } from '../prisma/prisma.service.js';
+import { StorageService } from '../storage/storage.service.js';
+import { CreateApplicationDto } from './dto/create-application.dto.js';
+import { UpdateApplicationDto } from './dto/update-application.dto.js';
+import { ApplicationStatus, Role } from '../generated/prisma/enums.js';
 
 @Injectable()
 export class ApplicationService {
