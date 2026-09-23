@@ -1,6 +1,8 @@
 <div align="center">
-	<a><img src="https://res.cloudinary.com/dmis04mcg/image/upload/v1780150130/haphap-logo_shcwvc.png" alt="" width="35%"></a>
+	<a><img src="https://res.cloudinary.com/dmis04mcg/image/upload/logo-haphap_lzhi3n.png" alt="" width="35%"></a>
 </div>
+
+</br>
 
 <div align="center">
 	<a><img src="https://img.shields.io/badge/Node.js-16.x-339933?logo=nodedotjs"></a>
@@ -14,7 +16,7 @@
 
 ## Description
 
-[HapHap]() is a dual-sided surplus food marketplace that connects customers with local merchants to rescue the day's high-quality unsold meals at discounted prices. By actively reducing food waste, the platform directly supports [SDG 12](https://sdgs.un.org/goals/goal12) (Responsible Consumption and Production).
+[HapHap]() is a dual-sided surplus food marketplace app that connects local merchants with customers to rescue the day's unsold meals at discounted prices before they go to waste. By actively reducing food waste, the app directly supports [SDG 12](https://sdgs.un.org/goals/goal12) (Responsible Consumption and Production).
 
 ## Documentation
 
@@ -23,7 +25,6 @@
 - [Tech Stack](#tech-stack)
 - [Endpoints](#endpoints)
 - [Software Architecture](#software-architecture)
-- [Appendix](#appendix)
 
 ## Features
 
@@ -209,6 +210,3 @@ All endpoints return responses using the following standardized format:
 ## Software Architecture
 
 <img src="https://res.cloudinary.com/dmis04mcg/image/upload/v1780150374/haphap-architecture_d4lia5.png">
-
-## License
-
